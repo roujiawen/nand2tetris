@@ -1,6 +1,6 @@
 import argparse
 from io import TextIOWrapper
-import random
+
 from pathlib import Path
 from typing import Literal, cast
 from collections.abc import Iterator
@@ -9,6 +9,45 @@ from dataclasses import dataclass
 CommandType = Literal["arithmetic", "push", "pop", "label", "goto", "if-goto", "function", "return", "call"]
 SEGMENT_POINTERS = {"local": "LCL", "argument": "ARG", "this": "THIS", "that": "THAT"}
 SEGMENT_BASE = {"pointer": 3, "temp": 5}
+
+CMP_TEMPLATE =  """
+@SP
+M=M-1
+
+A=M
+D=M
+
+@SP
+M=M-1
+
+A=M
+D=M-D
+
+@IFGOTO
+D;{jump}
+
+@0
+D=A
+@SP
+A=M
+M=D
+
+@ENDIF
+0;JMP
+(IFGOTO)
+
+@0
+D=!A
+@SP
+A=M
+M=D
+
+(ENDIF)
+
+@SP
+M=M+1
+"""
+
 ARITHMETIC_TRANSLATIONS = {
     "add": """
 @SP
@@ -55,119 +94,11 @@ M=-M
 M=M+1
 """,
 
-    "eq": """
-@SP
-M=M-1
+    "eq":CMP_TEMPLATE.format(jump="JEQ"),
 
-A=M
-D=M
-
-@SP
-M=M-1
-
-A=M
-D=M-D
-
-@IFGOTO
-D;JEQ
-
-@0
-D=A
-@SP
-A=M
-M=D
-
-@ENDIF
-0;JMP
-(IFGOTO)
-
-@0
-D=!A
-@SP
-A=M
-M=D
-
-(ENDIF)
-
-@SP
-M=M+1
-""",
-
-    "gt": """
-@SP
-M=M-1
-
-A=M
-D=M
-
-@SP
-M=M-1
-
-A=M
-D=M-D
-
-@IFGOTO
-D;JGT
-
-@0
-D=A
-@SP
-A=M
-M=D
-
-@ENDIF
-0;JMP
-(IFGOTO)
-
-@0
-D=!A
-@SP
-A=M
-M=D
-
-(ENDIF)
-
-@SP
-M=M+1
-""",     
+    "gt":CMP_TEMPLATE.format(jump="JGT"),  
  
-    "lt": """
-@SP
-M=M-1
-
-A=M
-D=M
-
-@SP
-M=M-1
-
-A=M
-D=M-D
-
-@IFGOTO
-D;JLT
-
-@0
-D=A
-@SP
-A=M
-M=D
-
-@ENDIF
-0;JMP
-(IFGOTO)
-
-@0
-D=!A
-@SP
-A=M
-M=D
-
-(ENDIF)
-
-@SP
-M=M+1
-""",
+    "lt": CMP_TEMPLATE.format(jump="JLT"),
 
     "and": """
 @SP
@@ -252,7 +183,7 @@ class Parser(Iterator[Command]):
         self._current = command
         return command
         
-    def _read_next_command(self) -> Command|None:
+    def _read_next_command(self) -> Command | None:
         parts: list[str] = []
 
         while not parts:
@@ -264,7 +195,8 @@ class Parser(Iterator[Command]):
             parts = line.split()
 
         # parse command
-        assert parts[0] in self.VALID_COMMANDS, f"{parts[0]} is not a valid command"
+        if parts[0] not in self.VALID_COMMANDS:
+            raise ValueError(f"{parts[0]} is not a valid command")
         ctype: CommandType = cast(CommandType, parts[0])
         
         arg1: str | None = None
@@ -278,7 +210,10 @@ class Parser(Iterator[Command]):
                 arg1 = parts[1]
 
         if len(parts) > 2:
-            arg2 = int(parts[2])
+            try:
+                arg2 = int(parts[2])
+            except ValueError:
+                raise ValueError(f"Invalid integer {parts[2]} in command {parts}") from None
 
         return Command(ctype, arg1, arg2)
 
@@ -288,17 +223,18 @@ class CodeWriter:
     
     def __init__(self, file: TextIOWrapper):
         self.file: TextIOWrapper = file
-        self.used_labels = set()
+        self.label_counter: dict[str, int] = {}
         
-    def write(self, command, filename_root):
+    def write(self, command: Command, filename_root: str):
         if command.ctype == "arithmetic":
             self._write_arithmetic(command)
         elif command.ctype == "push" or command.ctype == "pop":
             self._write_push_pop(command, filename_root)
-
-    def _write_arithmetic(self, command):
+    
+    def _write_arithmetic(self, command: Command):
         
-        assert command.arg1 in ARITHMETIC_TRANSLATIONS, "arg1 is not one of the valid arithmetic operations"
+        if command.arg1 not in ARITHMETIC_TRANSLATIONS:
+            raise ValueError("arg1 is not one of the valid arithmetic operations")
         translation = ARITHMETIC_TRANSLATIONS[command.arg1]
         
         if "ENDIF" in translation:
@@ -308,17 +244,20 @@ class CodeWriter:
         
         self.file.write(f"{translation}\n")
         
-    def _add_unique_label(self, translation: str, label: str):
-        ROM_SIZE = 32768
-        assert label in translation, f"Label {label} is not in translation: \n {translation}"
-        unique_label = ""
-        while (not unique_label) or (unique_label in self.used_labels):
-            unique_label = label + "_" + str(random.randint(0, ROM_SIZE*1000))
-        self.used_labels.add(unique_label)
-        return translation.replace(label, unique_label)
+    def _add_unique_label(self, translation: str, base_label: str):
+        assert base_label in translation, f"Label {base_label} is not in translation: \n {translation}"
+        
+        if base_label not in self.label_counter:
+            self.label_counter[base_label] = 0
+        
+        self.label_counter[base_label] += 1
+        unique_label = f"{base_label}_{self.label_counter[base_label]}"
+        
+        return translation.replace(base_label, unique_label)
         
     def _translate_push_constant(self, constant: int):
-        assert constant >= 0 and constant <= 32767, f"Constant {constant} is out of range 0...32767"
+        if constant < 0 or constant > 32767:
+            raise ValueError(f"Constant {constant} is out of range 0...32767")
         return f"""
 @{constant}
 D=A
@@ -330,7 +269,8 @@ M=D
 M=M+1
 """
     def _translate_standard_segments(self, command: Command):
-        assert command.arg1 in SEGMENT_POINTERS, f"Arg1 {command.arg1} is not a standard segment name"
+        if command.arg1 not in SEGMENT_POINTERS:
+            raise ValueError(f"Arg1 {command.arg1} is not a standard segment name")
         base = SEGMENT_POINTERS[command.arg1]
         if command.ctype == "push":
             return f"""
@@ -353,23 +293,23 @@ M=M+1
 D=M
 @{command.arg2}
 D=D+A
-@RAM13
+@R13
 M=D
 
 @SP
 M=M-1
 A=M
 D=M
-@RAM13
+@R13
 A=M
 M=D
 """
         
     def _translate_fixed_segments(self, command: Command):
-        
-        
-        assert command.arg1 in SEGMENT_BASE, f"Arg1 {command.arg1} is not a fixed segment name in command {command}"
-        assert command.arg2 is not None, f"Arg2 is None in command {command}"
+        if command.arg1 not in SEGMENT_BASE:
+            raise ValueError(f"Arg1 {command.arg1} is not a fixed segment name in command {command}")
+        if command.arg2 is None:
+            raise ValueError(f"Arg2 is None in command {command}")
         address = SEGMENT_BASE[command.arg1] + command.arg2
         
         if command.ctype == "push":
@@ -394,10 +334,11 @@ D=M
 @{address}
 M=D
 """
-
     def _translate_static(self, command: Command, filename_root: str):
-        assert filename_root, "VM filename cannot be empty for mapping static variable"
-        assert command.arg2 is not None, f"Arg2 is None in command {command}"
+        if not filename_root:
+            raise ValueError("VM filename cannot be empty for mapping static variable @Xxx.i")
+        if command.arg2 is None:
+            raise ValueError(f"Arg2 is None in command {command}")
         variable_name = filename_root + "." + str(command.arg2)
         
         if command.ctype == "push":
@@ -423,7 +364,9 @@ D=M
 M=D
 """
         
-    def _write_push_pop(self, command, filename_root):
+    def _write_push_pop(self, command: Command, filename_root: str):
+        if command.arg2 is None:
+            raise ValueError(f"Missing constant value in command {command}")
         if command.arg1 == "constant":
             if command.ctype != "push":
                 raise ValueError(f"command `{command.ctype}` is invalid for `constant`")
@@ -447,7 +390,8 @@ def main():
     source_filename = args.vm_filename
     source_path = Path(source_filename)
 
-    assert source_path.suffix == ".vm", "input file does not have an .vm extension"
+    if source_path.suffix != ".vm":
+        raise ValueError("input file does not have an .vm extension")
     out_filename = f"{source_path.parent}/{source_path.stem}.asm"
 
     with open(source_filename, "r") as infile, open(out_filename, "w") as outfile:
@@ -455,7 +399,6 @@ def main():
         c = CodeWriter(outfile)
         for command in p:
             c.write(command, source_path.stem)
-
 
 if __name__ == "__main__":
     main()
