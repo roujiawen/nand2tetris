@@ -93,16 +93,80 @@ class CodeWriter:
     def __init__(self, file: TextIOWrapper):
         self.file: TextIOWrapper = file
         self.vm_filename: str = ""
+        self.function_name: str = ""
         self.label_counter: dict[str, int] = {}
+        self.rtn_addr_counter: int = 0 #for unique return address
     
     def set_vm_filename(self, vm_filename: str):
         self.vm_filename = vm_filename
+    def set_function_name(self, function_name: str):
+        self.function_name = function_name
         
     def write(self, command: Command):
         if command.ctype == "arithmetic":
             self._write_arithmetic(command)
         elif command.ctype == "push" or command.ctype == "pop":
             self._write_push_pop(command)
+        elif command.ctype == "label":
+            self._write_label(command)
+        elif command.ctype == "goto":
+            self._write_goto(command)
+        elif command.ctype == "if-goto":
+            self._write_if_goto(command)
+        elif command.ctype == "call":
+            self._write_call(command)
+        elif command.ctype == "function":
+            self._write_function(command)
+        elif command.ctype == "return":
+            self._write_return(command)
+    
+    def _write_label(self, command: Command):
+        function = self.function_name
+        label = command.arg1
+        translation = f"({function}:{label})"
+        self.file.write(f"{translation}\n")
+        
+    def _write_goto(self, command: Command):
+        function = self.function_name
+        label = command.arg1
+        translation = f"""
+        @{function}:{label}
+        0;JMP
+        """
+        self.file.write(f"{translation}\n")
+        
+    def _write_if_goto(self, command: Command):
+        # pop value
+        # if the value is not zero, execution continues from the location marked by the label
+        function = self.function_name
+        label = command.arg1
+        translation = f"""
+        @SP
+        M=M-1
+        A=M
+        D=M
+        @{function}:{label}
+        D;JNE
+        """
+        self.file.write(f"{translation}\n")
+    
+    def _write_call(self, command: Command):
+        self.rtn_addr_counter += 1
+        new_return_address = f"RETURN_ADDRESS_{self.rtn_addr_counter}"
+        translation = ""
+        # translation = f"""
+        # @{new_return_address}
+        # """
+        self.file.write(f"{translation}\n")
+        
+    def _write_function(self, command: Command):
+        translation = ""
+        self.file.write(f"{translation}\n")
+        
+    def _write_return(self, command: Command):
+        translation = ""
+        self.file.write(f"{translation}\n")
+            
     
     def _write_arithmetic(self, command: Command):
         
