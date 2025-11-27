@@ -87,7 +87,6 @@ M=!M
 }
 
 
-
 class CodeWriter:
     
     def __init__(self, file: TextIOWrapper):
@@ -96,13 +95,32 @@ class CodeWriter:
         self.function_name: str = ""
         self.label_counter: dict[str, int] = {}
         self.rtn_addr_counter: int = 0 #for unique return address
+        self.sys_init_found: bool = False
+        
+    def get_bootstrap_code(self):
+        translation = """
+        // SP=256 // initialize the stack pointer to 0x0100
+        @256
+        D=A
+        @SP
+        M=D
+        // call Sys.init // invoke Sys.init
+        """
+        translation += self._formulate_call(Command("call", "Sys.init", 0))
+        return translation
     
     def set_vm_filename(self, vm_filename: str):
         self.vm_filename = vm_filename
+        self.set_function_name("")
+        
     def set_function_name(self, function_name: str):
+        # Naive assumption: code is treated as inside a function unless a new function declaration starts
+        # TODO: there no clear marker of end of a function in the syntax. how to discern whether a block 
+        # of code is still inside a function or in the global environment?
         self.function_name = function_name
         
     def write(self, command: Command):
+        self.file.write(f"\n// ################## {command} ##################\n")
         if command.ctype == "arithmetic":
             self._write_arithmetic(command)
         elif command.ctype == "push" or command.ctype == "pop":
@@ -150,21 +168,152 @@ class CodeWriter:
         """
         self.file.write(f"{translation}\n")
     
-    def _write_call(self, command: Command):
+    def _formulate_call(self, command: Command):
         self.rtn_addr_counter += 1
-        new_return_address = f"RETURN_ADDRESS_{self.rtn_addr_counter}"
-        translation = ""
-        # translation = f"""
-        # @{new_return_address}
-        # """
+        return_address = f"RETURN_ADDRESS_{self.rtn_addr_counter}"
+        function = command.arg1
+        if command.arg2 is None:
+            raise ValueError("Second argument of Call command is required")
+        num_args = command.arg2
+        push_D = """
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        """
+        translation = f"""
+        // push return-address
+        @{return_address}
+        D=A  
+        {push_D}
+        
+        // push LCL, ARG, THIS, THAT
+        @LCL
+        D=M
+        {push_D}
+        @ARG
+        D=M
+        {push_D}
+        @THIS
+        D=M
+        {push_D}
+        @THAT
+        D=M
+        {push_D}
+        
+        // ARG = SP-n-5
+        @{num_args+5}
+        D=A
+        @SP
+        D=M-D
+        @ARG
+        M=D
+        
+        // LCL = SP
+        @SP
+        D=M
+        @LCL
+        M=D
+        
+        // goto f
+        @{function}
+        0;JMP
+        
+        //label for the return address
+        ({return_address})
+        """ 
+        return translation
+        
+    def _write_call(self, command: Command):
+        translation = self._formulate_call(command)
         self.file.write(f"{translation}\n")
         
     def _write_function(self, command: Command):
-        translation = ""
+        function = command.arg1
+        if function is None:
+            raise ValueError("First argument of the function declaration command `function f k` is missing")
+        self.set_function_name(function)
+        if function == "Sys.init":
+            self.sys_init_found = True
+        
+        num_locals = command.arg2
+        if num_locals is None:
+            raise ValueError("Second argument of the function declaration command `function f k` is missing")
+        
+        translation = f"""
+({function})
+"""
+        for i in range(num_locals):
+            # Push 0 (initialise all local variables to be zero)
+            translation += """
+@SP
+A=M
+M=0
+@SP
+M=M+1
+"""
+        
         self.file.write(f"{translation}\n")
         
     def _write_return(self, command: Command):
-        translation = ""
+        
+        translation = """
+        // FRAME=LCL // FRAME is a temporary variable
+        @LCL
+        D=M
+        @FRAME
+        M=D
+        // RET=*(FRAME-5) // save return address in a temp. var
+        @5
+        D=A
+        @FRAME
+        A=M-D
+        D=M
+        @RET
+        M=D
+        // *ARG=pop() // reposition return value for caller
+        @SP
+        M=M-1
+        A=M
+        D=M
+        @ARG
+        A=M
+        M=D
+        // SP=ARG+1 // restore SP for caller
+        @ARG
+        D=M+1
+        @SP
+        M=D
+        //THAT=*(FRAME-1) // restore THAT of calling function
+        @FRAME
+        AM=M-1
+        D=M
+        @THAT
+        M=D
+        //THIS=*(FRAME-2) // restore THIS of calling function
+        @FRAME
+        AM=M-1
+        D=M
+        @THIS
+        M=D
+        //ARG=*(FRAME-3) // restore ARG of calling function
+        @FRAME
+        AM=M-1
+        D=M
+        @ARG
+        M=D
+        //LCL=*(FRAME-4) // Restore LCL of calling function
+        @FRAME
+        A=M-1
+        D=M
+        @LCL
+        M=D
+        //goto RET // GOTO the return-address
+        @RET
+        A=M
+        0;JMP
+        """
         self.file.write(f"{translation}\n")
             
     

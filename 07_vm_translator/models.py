@@ -9,3 +9,5 @@ class Command:
     ctype: CommandType
     arg1: str | None = None #TODO: validate str format e.g. allowed special characters
     arg2: int | None = None
+    def __str__(self):
+        return f"{self.ctype} {self.arg1} {self.arg2}"

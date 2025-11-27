@@ -18,8 +18,9 @@ def main():
     args = arg_parser.parse_args()
     source_path = Path(args.vm_filename)
     out_filename = f"{source_path.parent}/{source_path.stem}.asm"
+    out_path = Path(out_filename)
     
-    with open(out_filename, "w") as outfile:
+    with open(out_path, "w") as outfile:
         code_writer = CodeWriter(outfile)
         if source_path.is_dir():
                 for each_vm_path in source_path.glob("*.vm"):
@@ -29,6 +30,11 @@ def main():
             translate_file(source_path, code_writer)
         else:
             raise ValueError("input path is invalid (must be either a directory or a .vm file)")
+        
+    if code_writer.sys_init_found:
+        pre_append = code_writer.get_bootstrap_code()
+        old = out_path.read_text()
+        out_path.write_text(pre_append + old)
 
 if __name__ == "__main__":
     main()
