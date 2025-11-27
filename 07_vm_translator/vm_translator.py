@@ -12,86 +12,53 @@ SEGMENT_BASE = {"pointer": 3, "temp": 5}
 
 CMP_TEMPLATE =  """
 @SP
-M=M-1
-
-A=M
+AM=M-1
 D=M
 
-@SP
-M=M-1
-
-A=M
+A=A-1
 D=M-D
 
 @IFGOTO
 D;{jump}
 
-@0
-D=A
 @SP
-A=M
-M=D
+A=M-1
+M=0
 
 @ENDIF
 0;JMP
 (IFGOTO)
 
-@0
-D=!A
 @SP
-A=M
-M=D
+A=M-1
+M=-1
 
 (ENDIF)
-
-@SP
-M=M+1
 """
 
 ARITHMETIC_TRANSLATIONS = {
     "add": """
 @SP
-M=M-1
-
-A=M
+AM=M-1
 D=M
 
-@SP
-M=M-1
-
-A=M
+A=A-1
 M=D+M
-
-@SP
-M=M+1
 """,
 
     "sub": """
 @SP
-M=M-1
-
-A=M
+AM=M-1
 D=M
 
-@SP
-M=M-1
-
-A=M
+A=A-1
 M=M-D
-
-@SP
-M=M+1
 """,
     
     "neg": """
 @SP
-M=M-1
-
-A=M
+A=M-1
 M=-M
-
-@SP
-M=M+1
 """,
 
     "eq":CMP_TEMPLATE.format(jump="JEQ"),
@@ -102,47 +69,26 @@ M=M+1
 
     "and": """
 @SP
-M=M-1
-
-A=M
+AM=M-1
 D=M
 
-@SP
-M=M-1
-
-A=M
+A=A-1
 M=D&M
-
-@SP
-M=M+1
 """,
     
     "or": """
 @SP
-M=M-1
-
-A=M
+AM=M-1
 D=M
 
-@SP
-M=M-1
-
-A=M
+A=A-1
 M=D|M
-
-@SP
-M=M+1
 """,
     
     "not": """
 @SP
-M=M-1
-
-A=M
+A=M-1
 M=!M
-
-@SP
-M=M+1
 """,
 }
 
@@ -220,16 +166,19 @@ class Parser(Iterator[Command]):
 
 class CodeWriter:
     
-    
     def __init__(self, file: TextIOWrapper):
         self.file: TextIOWrapper = file
+        self.vm_filename: str = ""
         self.label_counter: dict[str, int] = {}
+    
+    def set_vm_filename(self, vm_filename: str):
+        self.vm_filename = vm_filename
         
-    def write(self, command: Command, filename_root: str):
+    def write(self, command: Command):
         if command.ctype == "arithmetic":
             self._write_arithmetic(command)
         elif command.ctype == "push" or command.ctype == "pop":
-            self._write_push_pop(command, filename_root)
+            self._write_push_pop(command)
     
     def _write_arithmetic(self, command: Command):
         
@@ -334,12 +283,12 @@ D=M
 @{address}
 M=D
 """
-    def _translate_static(self, command: Command, filename_root: str):
-        if not filename_root:
+    def _translate_static(self, command: Command):
+        if not self.vm_filename:
             raise ValueError("VM filename cannot be empty for mapping static variable @Xxx.i")
         if command.arg2 is None:
             raise ValueError(f"Arg2 is None in command {command}")
-        variable_name = filename_root + "." + str(command.arg2)
+        variable_name = self.vm_filename + "." + str(command.arg2)
         
         if command.ctype == "push":
             return f"""
@@ -364,7 +313,7 @@ D=M
 M=D
 """
         
-    def _write_push_pop(self, command: Command, filename_root: str):
+    def _write_push_pop(self, command: Command):
         if command.arg2 is None:
             raise ValueError(f"Missing constant value in command {command}")
         if command.arg1 == "constant":
@@ -376,29 +325,37 @@ M=D
         elif command.arg1 in ("pointer", "temp"):
             translation = self._translate_fixed_segments(command)
         elif command.arg1 == "static":
-            translation = self._translate_static(command, filename_root)
+            translation = self._translate_static(command)
         else:
             raise ValueError(f"Invalid Arg1 for command {command}")
             
         self.file.write(f"{translation}\n")
 
+def translate_file(vm_path: Path, code_writer: CodeWriter):
+    with open(vm_path, "r") as infile:
+        parser = Parser(infile)
+        code_writer.set_vm_filename(vm_path.stem)
+        
+        for command in parser:
+            code_writer.write(command)
 
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("vm_filename")
     args = arg_parser.parse_args()
-    source_filename = args.vm_filename
-    source_path = Path(source_filename)
-
-    if source_path.suffix != ".vm":
-        raise ValueError("input file does not have an .vm extension")
+    source_path = Path(args.vm_filename)
     out_filename = f"{source_path.parent}/{source_path.stem}.asm"
-
-    with open(source_filename, "r") as infile, open(out_filename, "w") as outfile:
-        p = Parser(infile)
-        c = CodeWriter(outfile)
-        for command in p:
-            c.write(command, source_path.stem)
+    
+    with open(out_filename, "w") as outfile:
+        code_writer = CodeWriter(outfile)
+        if source_path.is_dir():
+                for each_vm_path in source_path.glob("*.vm"):
+                    translate_file(each_vm_path, code_writer)
+        elif source_path.is_file() and source_path.suffix == ".vm":
+            print("File")
+            translate_file(source_path, code_writer)
+        else:
+            raise ValueError("input path is invalid (must be either a directory or a .vm file)")
 
 if __name__ == "__main__":
     main()
