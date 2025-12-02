@@ -1,0 +1,29 @@
+/** Represent the game frame */
+class Frame {
+    field int width, height, x0, y0;
+    
+    constructor Frame new(int x0_, int y0_){
+        let width = 180;
+        let height = 250;
+        let x0 = x0_;
+        let y0 = y0_;
+        return this;
+    }
+    method int getX0() {
+        return x0;
+    }
+    
+    method int getX1() {
+        return x0+width;
+    }
+    method int getY1() {
+        return y0+height;
+    }
+    method void draw() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+        return;
+    }
+
+
+}

@@ -1,0 +1,44 @@
+/** Represent the game mechanics */
+class Game {
+    field Frame frame;
+    field Player player;
+    field PlatformArray platforms;
+    field Conveyor conveyor;
+    
+    constructor Game new(Frame frame_, Player player_, PlatformArray platforms_, Conveyor conveyor_){
+        let frame = frame_;
+        let player = player_;
+        let platforms = platforms_;
+        let conveyor = conveyor_;
+        return this;
+    }
+        
+    method void advance() {
+        var int i;
+        var Platform p;
+        var boolean success;
+        
+        do player.move();
+        do player.fall();
+        
+        
+        do platforms.moveUp();
+        do platforms.addNewBottom(10);
+        
+        let success = player.moveUp();
+        
+        do frame.draw();
+        do platforms.draw();
+        if (success) {
+            do player.draw();
+        } else {
+            do Output.printString("GAME OVER");
+        }
+        
+        do conveyor.advance();
+        
+        return;
+    }
+
+
+}

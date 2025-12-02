@@ -1,0 +1,133 @@
+
+class Player {
+    field int width, height, x0, y0, xInc, yInc, upInc, whichPlatform, numPlatforms;
+    field boolean onPlatform;
+    field Frame frame;
+    field PlatformArray platforms;
+    field Conveyor conveyor;
+    
+    constructor Player new(int x0_, int y0_, int upInc_, PlatformArray platforms_, Frame frame_, Conveyor conveyor_){
+        let frame = frame_;
+        let width = 8;
+        let height = 12;
+        let xInc = 2;
+        let yInc = 2;
+        let upInc = upInc_;
+        let x0 = x0_;
+        let y0 = y0_;
+        let onPlatform = false;
+        let whichPlatform = 0;
+        let platforms = platforms_;
+        let conveyor = conveyor_;
+        
+        return this;
+    }
+    
+    method boolean moveUp() {
+        let y0 = y0 - (upInc * conveyor.move());
+        if (y0 < 0) {
+            return false;
+        }
+        return true;
+    }
+    
+    method void move() {
+        var char key;
+        let key = Keyboard.keyPressed();
+        if (key=130) {
+            // left 
+            let x0 = Math.max(x0 - xInc, 0);
+        }
+        if (key=132) {
+            // right
+            let x0 = Math.min(x0 + xInc, frame.getX1()-width);
+        }
+        
+        // TODO: left right blocking by another platform
+        return;
+    }
+    
+    method void fall() {
+        var int foot;
+        var int p1, p2;
+        var Platform nextPlatform;
+        var boolean cond1, cond2, cond3;
+        let nextPlatform = platforms.get(whichPlatform);
+        // detect falling
+        if (onPlatform) {
+            // detect if status changes
+            if (~(nextPlatform.support(x0, x0+width))) {
+                //start falling
+                let onPlatform = false;
+                let y0 = y0 + yInc;
+                // detect falling out of range
+            }
+        } else {
+            // if not on a platform, keep falling
+            let y0 = y0 + yInc;
+            let foot = y0+height;
+            // TODO: detect falling out of range?
+            
+            let p1 = platforms.getP1();
+            let p2 = platforms.getP2();
+            
+            
+            // update nextPlatform position within the platforms list
+            // make sure nextPlatform still exists / hasn't been deleted
+            let cond1 = whichPlatform < p1;
+            let cond2 = p1 < p2;
+            let cond3 = p2 < whichPlatform;
+            while ((cond1 & cond2) |
+                (cond2 & cond3) |
+                (cond3 & cond1)) {
+                    let whichPlatform = whichPlatform + 1;
+                    if (whichPlatform = platforms.getMaxSize()) {
+                        let whichPlatform = 0;
+                    }
+                    let nextPlatform = platforms.get(whichPlatform);
+                    
+                    let cond1 = whichPlatform < p1;
+                    let cond2 = p1 < p2;
+                    let cond3 = p2 < whichPlatform;
+                }
+            // otherwise continue:
+            while ((nextPlatform.getY0() < foot) & (~(whichPlatform =p2))) {
+                // go to the next platform
+                // 1. inc index
+                let whichPlatform = whichPlatform + 1;
+                // 2. (if index is at MaxSize i.e. p2-p1-w ) set index to 0
+                if (whichPlatform = platforms.getMaxSize()) {
+                    let whichPlatform = 0;
+                }
+                // 3. (if index is beyond p2) don't update nextPlatform
+                if (~(whichPlatform =p2)) {
+                    let nextPlatform = platforms.get(whichPlatform);
+                }
+            }
+            
+            if (~(whichPlatform =p2)) {
+                // it must be that nextPlatform.getY0() >= foot
+                // detect if reaches a platform
+                // if same height
+                if ((nextPlatform.sameHeight(foot, foot+yInc)) & 
+                    (nextPlatform.support(x0, x0+width))) {
+                    // stand on platform
+                    let onPlatform = true;
+                } 
+            }
+        
+            
+        }
+        return;
+    }
+        
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x0+1, y0+1, x0+width-1, y0+height-1);
+        return;
+    }
+
+
+}

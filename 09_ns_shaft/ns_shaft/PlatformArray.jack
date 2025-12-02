@@ -1,0 +1,145 @@
+/** Represent the game frame */
+class PlatformArray {
+    field int size;
+    field int maxSize, paddedMaxSize;
+    field Array arr;
+    field int p1, p2;
+    field int upInc;
+    field int xlim0, xlim1, y1;
+    field int width, height;
+    field Utils utils;
+    field Frame frame;
+    field int coolOffPeriod;
+    field int coolOffCount;
+    field Conveyor conveyor;
+    
+    constructor PlatformArray new(int width_, int height_, Frame frame_, int upInc_, Conveyor conveyor_){
+        let width = width_;
+        let height = height_;
+        let frame = frame_;
+        let upInc = upInc_;
+        
+        let xlim0 = frame.getX0();
+        let xlim1 = frame.getX1()-width;
+        let y1 = frame.getY1()-height;
+        
+        let maxSize = 25;
+        let paddedMaxSize = 20;
+        let arr = Array.new(maxSize);
+        let size = 0;
+        let p1 = 0;
+        let p2 = 0;
+        let utils = Utils.new();
+        
+        let coolOffPeriod = 50;
+        let coolOffCount = 0;
+        
+        let conveyor = conveyor_;
+        
+        return this;
+    }
+    
+    method void newAt(int y) {
+        var Platform plt;
+        let plt = Platform.new(xlim0+utils.randInt(xlim1), y, width, height, upInc, conveyor);
+        let arr[p2] = plt;
+        let p2 = p2 + 1;
+        if (p2 = maxSize) {
+            let p2 = 0;
+        }
+        let size = size + 1;
+        let coolOffCount = 0;
+        return;
+    }
+    
+    method void addNewBottom(int prob) {
+        // add new platform to the bottom with probability X/1000
+        let coolOffCount = coolOffCount + 1;
+        if (size = paddedMaxSize) {
+            return;
+        }
+        if (coolOffCount < coolOffPeriod) {
+            return;
+        }
+        if (utils.randInt(1000) < prob) {
+            do newAt(y1);
+        }
+        return;
+    }
+    
+    method Platform get(int i) {
+        return arr[i];
+    }
+    
+    method int getP1() {
+        return p1;
+    }
+    
+    method int getP2() {
+        return p2;
+    }
+    method int getSize() {
+        return size;
+    }
+    
+    method int getMaxSize() {
+        return maxSize;
+    }
+    
+    method void moveUp() {
+        var int i, numOps;
+        var Platform plt;
+        var boolean success;
+        
+        let i = p1;
+        let numOps = size;
+        
+        while (numOps > 0) {
+            let plt = arr[i];
+            
+            let success = plt.moveUp();
+            if (~success) {
+                // delete platform
+                do plt.dispose();
+                let p1 = p1 + 1;
+                let size = size - 1;
+                if (p1 = maxSize) {
+                    let p1 = 0;
+                }
+                // there needs to be at least 1 platform
+                if (size =0) {
+                    do addNewBottom(1000);
+                }
+            }
+            let i = i + 1;
+            if (i = maxSize) {
+                let i = 0;
+            }
+            let numOps = numOps - 1;
+        }
+        return;
+    }
+    
+    
+    method void draw() {
+        var int i, numOps;
+        var Platform plt;
+        
+        let i = p1;
+        let numOps = size;
+        
+        while (numOps > 0) {
+            let plt = arr[i];
+            do plt.draw();
+            
+            let i = i + 1;
+            if (i = maxSize) {
+                let i = 0;
+            }
+            let numOps = numOps - 1;
+        }
+        return;
+    }
+
+
+}

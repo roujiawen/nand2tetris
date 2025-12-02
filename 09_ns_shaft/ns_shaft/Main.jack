@@ -1,0 +1,39 @@
+
+class Main {
+    function void main() {
+        var Frame f;
+        var Platform p;
+        var Utils utils;
+        var PlatformArray platforms;
+        var Player player;
+        var Game game;
+        var int i, numPlatforms;
+        var Conveyor conveyor;
+        
+        let f = Frame.new(0, 0);
+        do f.draw();
+        
+        let conveyor = Conveyor.new();
+        
+        
+        let i = 0;
+        let platforms = PlatformArray.new(45, 6, f, 1, conveyor);
+        while (i < 10) {
+            do platforms.newAt(50+((180/10)*i));
+            let i = i + 1;
+        }
+        do platforms.draw();
+        
+        let player = Player.new(36, 0, 1, platforms, f, conveyor);
+        
+        let game = Game.new(f, player, platforms, conveyor);
+        
+        let i = 0;
+        while (i < 200) {
+        do game.advance();
+        do Sys.wait(10);
+        }
+        
+        return;
+    }
+}

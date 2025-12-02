@@ -1,0 +1,61 @@
+
+class Platform {
+    field int width, height, x0, y0, upInc;
+    field Conveyor conveyor;
+    
+    constructor Platform new(int x0_, int y0_, int width_, int height_, int upInc_, Conveyor conveyor_){
+        let width = width_;
+        let height = height_;
+        let x0 = x0_;
+        let y0 = y0_;
+        let upInc = upInc_;
+        let conveyor = conveyor_;
+        return this;
+    }
+        
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+        return;
+    }
+    
+    method boolean moveUp() {
+        let y0 = y0 - (upInc * conveyor.move());
+        if (y0 < 0) {
+            return false;
+        }
+        return true;
+    }
+    
+    method int getY0() {
+        return y0;
+    }
+    
+    method boolean sameHeight(int yy0, int yy1) {
+        if ((y0 < yy1)) {
+            if ((yy0 < y0) | (yy0 = y0)) {
+                return true;
+            }
+        }
+        return false;    
+    }
+    
+    method boolean support(int xx0, int xx1) {
+        var int x1;
+        let x1 = x0 + width;
+        if ((xx0 > x1) | (xx0 = x1)) {
+            return false;
+        }
+        if ((xx1 < x0) | (xx1 = x0)) {
+            return false;
+        }
+        return true;    
+    }
+    
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+    
+
+}

@@ -1,0 +1,27 @@
+
+class Conveyor {
+    field int slowDownFactor;
+    field int slowDownCount;
+    
+    constructor Conveyor new(){
+        let slowDownFactor = 5;
+        let slowDownCount = 0;
+        return this;
+    }
+    
+    method void advance() {
+        let slowDownCount = slowDownCount + 1;
+        if (slowDownCount>slowDownFactor) {
+            let slowDownCount = slowDownCount - slowDownFactor;
+        }
+        return;
+    }
+    
+    method int move() {
+        if (slowDownCount=slowDownFactor) {
+            return 1;
+        }
+        return 0;
+    }
+
+}
