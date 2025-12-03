@@ -18,22 +18,18 @@ class Game {
         var Platform p;
         var boolean success;
         
+        do frame.draw();
+        do platforms.draw();
+        do player.draw();
+        
         do player.move();
         do player.fall();
-        
+        do player.moveUp();
         
         do platforms.moveUp();
         do platforms.addNewBottom(10);
         
-        let success = player.moveUp();
         
-        do frame.draw();
-        do platforms.draw();
-        if (success) {
-            do player.draw();
-        } else {
-            do Output.printString("GAME OVER");
-        }
         
         do conveyor.advance();
         

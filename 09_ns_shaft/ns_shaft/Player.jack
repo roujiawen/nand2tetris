@@ -5,8 +5,9 @@ class Player {
     field Frame frame;
     field PlatformArray platforms;
     field Conveyor conveyor;
+    field GameStatus gameStatus;
     
-    constructor Player new(int x0_, int y0_, int upInc_, PlatformArray platforms_, Frame frame_, Conveyor conveyor_){
+    constructor Player new(int x0_, int y0_, int upInc_, PlatformArray platforms_, Frame frame_, Conveyor conveyor_, GameStatus gameStatus_){
         let frame = frame_;
         let width = 8;
         let height = 12;
@@ -19,16 +20,17 @@ class Player {
         let whichPlatform = 0;
         let platforms = platforms_;
         let conveyor = conveyor_;
+        let gameStatus = gameStatus_;
         
         return this;
     }
     
-    method boolean moveUp() {
+    method void moveUp() {
         let y0 = y0 - (upInc * conveyor.move());
-        if (y0 < 0) {
-            return false;
+        if (y0 < frame.getY0()) {
+            do gameStatus.setGameOver(true);
         }
-        return true;
+        return;
     }
     
     method void move() {
@@ -56,17 +58,26 @@ class Player {
         // detect falling
         if (onPlatform) {
             // detect if status changes
-            if (~(nextPlatform.support(x0, x0+width))) {
+            if (~nextPlatform.support(x0, x0+width)) {
                 //start falling
                 let onPlatform = false;
                 let y0 = y0 + yInc;
                 // detect falling out of range
+                let foot = y0+height;
+                if (foot > frame.getY1()) {
+                    do gameStatus.setGameOver(true);
+                    return;
+                }
             }
         } else {
             // if not on a platform, keep falling
             let y0 = y0 + yInc;
             let foot = y0+height;
-            // TODO: detect falling out of range?
+            // detect falling out of range
+            if (foot > frame.getY1()) {
+                do gameStatus.setGameOver(true);
+                return;
+            }
             
             let p1 = platforms.getP1();
             let p2 = platforms.getP2();
@@ -113,18 +124,20 @@ class Player {
                     (nextPlatform.support(x0, x0+width))) {
                     // stand on platform
                     let onPlatform = true;
+                    do nextPlatform.onStanding();
                 } 
             }
         
             
         }
+        
         return;
     }
         
     method void draw() {
-        do Screen.setColor(true);
-        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
         do Screen.setColor(false);
+        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+        do Screen.setColor(true);
         do Screen.drawRectangle(x0+1, y0+1, x0+width-1, y0+height-1);
         return;
     }

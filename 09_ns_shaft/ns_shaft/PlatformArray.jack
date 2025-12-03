@@ -5,22 +5,24 @@ class PlatformArray {
     field Array arr;
     field int p1, p2;
     field int upInc;
-    field int xlim0, xlim1, y1;
+    field int x0, paddedFrameWidth, y1;
     field int width, height;
     field Utils utils;
     field Frame frame;
     field int coolOffPeriod;
     field int coolOffCount;
     field Conveyor conveyor;
+    field int probType0, probType1;
+    field GameStatus gameStatus;
     
-    constructor PlatformArray new(int width_, int height_, Frame frame_, int upInc_, Conveyor conveyor_){
+    constructor PlatformArray new(int width_, int height_, Frame frame_, int upInc_, Conveyor conveyor_, GameStatus gameStatus_){
         let width = width_;
         let height = height_;
         let frame = frame_;
         let upInc = upInc_;
         
-        let xlim0 = frame.getX0();
-        let xlim1 = frame.getX1()-width;
+        let x0 = frame.getX0();
+        let paddedFrameWidth = frame.getWidth()-width;
         let y1 = frame.getY1()-height;
         
         let maxSize = 25;
@@ -31,17 +33,22 @@ class PlatformArray {
         let p2 = 0;
         let utils = Utils.new();
         
-        let coolOffPeriod = 50;
+        let coolOffPeriod = 100;
         let coolOffCount = 0;
         
         let conveyor = conveyor_;
         
+        let probType0 = 80; //%
+        let probType1 = 50; //%
+        
+        let gameStatus = gameStatus_;
+        
         return this;
     }
     
-    method void newAt(int y) {
+    method void newAt(int y, int type) {
         var Platform plt;
-        let plt = Platform.new(xlim0+utils.randInt(xlim1), y, width, height, upInc, conveyor);
+        let plt = Platform.new(type, x0+utils.randInt(paddedFrameWidth), y, width, height, upInc, conveyor, frame, gameStatus);
         let arr[p2] = plt;
         let p2 = p2 + 1;
         if (p2 = maxSize) {
@@ -62,7 +69,16 @@ class PlatformArray {
             return;
         }
         if (utils.randInt(1000) < prob) {
-            do newAt(y1);
+            if (utils.randInt(100) < probType0) {
+                do newAt(y1, 0);
+            } else {
+                if (utils.randInt(100) < probType1) {
+                    do newAt(y1, 1); 
+                } else {
+                    do newAt(y1, 2);
+                }
+            }
+            
         }
         return;
     }

@@ -1,27 +1,74 @@
 /** Represent the game frame */
 class Frame {
     field int width, height, x0, y0;
+    field GameStatus gameStatus;
     
-    constructor Frame new(int x0_, int y0_){
+    constructor Frame new(int x0_, int y0_, GameStatus gameStatus_){
         let width = 180;
         let height = 250;
         let x0 = x0_;
         let y0 = y0_;
+        let gameStatus = gameStatus_;
         return this;
     }
     method int getX0() {
         return x0;
     }
     
+    method int getWidth() {
+        return width;
+    }
+    
     method int getX1() {
         return x0+width;
     }
+    
+    method int getY0() {
+        return y0;
+    }
+    
     method int getY1() {
         return y0+height;
     }
     method void draw() {
+        var int dx;
+    
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x0, y0-5, x0+width, y0+height);
+        
         do Screen.setColor(false);
-        do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+        do Screen.drawLine(x0-1, y0-5, x0-1, y0+height); // static
+        do Screen.drawLine(x0+width+1, y0, x0+width+1, y0+height); // static
+        
+        // teeth
+        do Screen.setColor(false);
+        let dx = 0;
+        while (dx < (width-2)) {
+            do Screen.drawPixel(x0+dx+1, y0-4);
+            do Screen.drawPixel(x0+dx+2, y0-4);
+            do Screen.drawPixel(x0+dx+3, y0-4);
+            do Screen.drawPixel(x0+dx+4, y0-4);
+            do Screen.drawPixel(x0+dx+5, y0-4);
+            
+            do Screen.drawPixel(x0+dx+1, y0-3);
+            do Screen.drawPixel(x0+dx+2, y0-3);
+            do Screen.drawPixel(x0+dx+3, y0-3);
+            do Screen.drawPixel(x0+dx+4, y0-3);
+            do Screen.drawPixel(x0+dx+5, y0-3);
+            
+            do Screen.drawPixel(x0+dx+2, y0-2);
+            do Screen.drawPixel(x0+dx+3, y0-2);
+            do Screen.drawPixel(x0+dx+4, y0-2);
+            
+            do Screen.drawPixel(x0+dx+2, y0-1);
+            do Screen.drawPixel(x0+dx+3, y0-1);
+            do Screen.drawPixel(x0+dx+4, y0-1);
+            
+            do Screen.drawPixel(x0+dx+3, y0+0);
+            do Screen.drawPixel(x0+dx+3, y0+1);
+            let dx = dx+7;
+        }
+        
         return;
     }
 
