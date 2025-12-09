@@ -40,7 +40,7 @@ class PlatformArray {
         
         let probType0 = 70; //%
         let probType1 = 15; //%
-        let probType2 = 75; //%
+        let probType2 = 15; //%
         
         let gameStatus = gameStatus_;
         
@@ -76,7 +76,11 @@ class PlatformArray {
                 if (utils.randInt(100) < probType1) {
                     do newAt(y1, 1); 
                 } else {
-                    do newAt(y1, 2);
+                    if (utils.randInt(100) < probType2) {
+                        do newAt(y1, 2);
+                    } else {
+                        do newAt(y1, 3);
+                    }
                 }
             }
             

@@ -8,6 +8,8 @@ class Player {
     field GameStatus gameStatus;
     field int leftRightState; // 0: neutral; 1: left; 2: right
     field int animationTickTock;
+    field int riseInterval;
+    field int riseCount;
     
     constructor Player new(int x0_, int y0_, int upInc_, PlatformArray platforms_, Frame frame_, Conveyor conveyor_, GameStatus gameStatus_){
         let frame = frame_;
@@ -25,6 +27,9 @@ class Player {
         let gameStatus = gameStatus_;
         let leftRightState = 0;
         let animationTickTock = 0;
+        
+        let riseInterval = 40;
+        let riseCount = 0;
         
         return this;
     }
@@ -58,12 +63,32 @@ class Player {
         return;
     }
     
+    method void startRising() {
+        let riseCount = riseInterval;
+        return;
+    }
+    
     method void fall() {
         var int foot;
         var int p1, p2;
         var Platform nextPlatform;
         var boolean cond1, cond2, cond3;
         let nextPlatform = platforms.get(whichPlatform);
+        
+        if (riseCount > 0) {
+            if (riseCount>10) {
+                let y0 = y0 - (yInc * 2);
+            } else {
+                if (riseCount>3) {
+                    let y0 = y0 - yInc;
+                }
+            }
+            let onPlatform = false;
+            // hit top?
+            // roll back nextPlatform/whichPlatform
+            let riseCount = riseCount - 1;
+            return;
+        }
         // detect falling
         if (onPlatform) {
             // detect if status changes
@@ -136,6 +161,9 @@ class Player {
                     // stand on platform
                     let onPlatform = true;
                     do nextPlatform.onStanding();
+                    if (nextPlatform.getType()=3) {
+                        do startRising();
+                    }
                 } 
             }
         

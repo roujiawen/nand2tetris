@@ -66,43 +66,75 @@ class Platform {
             }
             
             if (dissolveCountDown > 0) {
-            // do Screen.setColor(true);
-            // do Screen.drawRectangle(x0, y0, x0+width, y0+height);
-            do Screen.setColor(false);
-            do Screen.drawRectangle(x0+1, y0+1, x0+13, y0+height);
-            do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height);
-            do Screen.drawRectangle(x0+32, y0+1, x0+width-1, y0+height);
-            
-            do Screen.setColor(true);
-            
-            // do Screen.drawPixel(x0+8+1, y0);
-            do Screen.drawPixel(x0+8-1, y0+6);
-            // do Screen.drawPixel(x0+23+1, y0);
-            do Screen.drawPixel(x0+23-1, y0+6);
-            // do Screen.drawPixel(x0+38+1, y0);
-            do Screen.drawPixel(x0+38-1, y0+6);
-            
-            do Screen.drawPixel(x0+8+0, y0+1);
-            do Screen.drawPixel(x0+8-1, y0+2);
-            do Screen.drawPixel(x0+8+0, y0+3);
-            do Screen.drawPixel(x0+8+1, y0+4);
-            do Screen.drawPixel(x0+8+0, y0+5);
-            
-            do Screen.drawPixel(x0+23+0, y0+1);
-            do Screen.drawPixel(x0+23-1, y0+2);
-            do Screen.drawPixel(x0+23+0, y0+3);
-            do Screen.drawPixel(x0+23+1, y0+4);
-            do Screen.drawPixel(x0+23+0, y0+5);
-            
-            do Screen.drawPixel(x0+38+0, y0+1);
-            do Screen.drawPixel(x0+38-1, y0+2);
-            do Screen.drawPixel(x0+38+0, y0+3);
-            do Screen.drawPixel(x0+38+1, y0+4);
-            do Screen.drawPixel(x0+38+0, y0+5);
+                // do Screen.setColor(true);
+                // do Screen.drawRectangle(x0, y0, x0+width, y0+height);
+                do Screen.setColor(false);
+                do Screen.drawRectangle(x0+1, y0+1, x0+13, y0+height);
+                do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height);
+                do Screen.drawRectangle(x0+32, y0+1, x0+width-1, y0+height);
+                
+                do Screen.setColor(true);
+                
+                // do Screen.drawPixel(x0+8+1, y0);
+                do Screen.drawPixel(x0+8-1, y0+6);
+                // do Screen.drawPixel(x0+23+1, y0);
+                do Screen.drawPixel(x0+23-1, y0+6);
+                // do Screen.drawPixel(x0+38+1, y0);
+                do Screen.drawPixel(x0+38-1, y0+6);
+                
+                do Screen.drawPixel(x0+8+0, y0+1);
+                do Screen.drawPixel(x0+8-1, y0+2);
+                do Screen.drawPixel(x0+8+0, y0+3);
+                do Screen.drawPixel(x0+8+1, y0+4);
+                do Screen.drawPixel(x0+8+0, y0+5);
+                
+                do Screen.drawPixel(x0+23+0, y0+1);
+                do Screen.drawPixel(x0+23-1, y0+2);
+                do Screen.drawPixel(x0+23+0, y0+3);
+                do Screen.drawPixel(x0+23+1, y0+4);
+                do Screen.drawPixel(x0+23+0, y0+5);
+                
+                do Screen.drawPixel(x0+38+0, y0+1);
+                do Screen.drawPixel(x0+38-1, y0+2);
+                do Screen.drawPixel(x0+38+0, y0+3);
+                do Screen.drawPixel(x0+38+1, y0+4);
+                do Screen.drawPixel(x0+38+0, y0+5);
                 return;
             }
             return;
         }
+        
+        if (type = 3) {
+            do Screen.setColor(false);
+            do Screen.drawLine(x0, y0, x0+width, y0);
+            do Screen.drawLine(x0, y0+height, x0+width, y0+height);
+            
+            do Screen.drawLine(x0+2, y0+1, x0+13, y0+height-1);
+            do Screen.drawLine(x0+2, y0+height-1, x0+13, y0+1);
+            do Screen.drawPixel(x0+1, y0+1);
+            do Screen.drawPixel(x0+1, y0+height-1);
+            do Screen.drawPixel(x0+0, y0+1);
+            do Screen.drawPixel(x0+0, y0+height-1);
+            
+            do Screen.drawLine(x0+18, y0+1, x0+29, y0+height-1);
+            do Screen.drawLine(x0+18, y0+height-1, x0+29, y0+1);
+            do Screen.drawPixel(x0+17, y0+1);
+            do Screen.drawPixel(x0+17, y0+height-1);
+            do Screen.drawPixel(x0+16, y0+1);
+            do Screen.drawPixel(x0+16, y0+height-1);
+            
+            do Screen.drawLine(x0+width-11, y0+1, x0+width, y0+height-1);
+            do Screen.drawLine(x0+width-11, y0+height-1, x0+width, y0+1);
+            do Screen.drawPixel(x0+width-12, y0+1);
+            do Screen.drawPixel(x0+width-12, y0+height-1);
+            do Screen.drawPixel(x0+width-13, y0+1);
+            do Screen.drawPixel(x0+width-13, y0+height-1);
+            
+            // do Screen.drawLine(x0+5, y0, x0+width-5, y0+height);
+            // do Screen.drawLine(x0+5, y0+height, x0+width-5, y0);
+            return;
+        }
+        
         return;
     }
     
@@ -128,11 +160,18 @@ class Platform {
         if (type = 2) {
             let dissolveCountDown = dissolvePeriod;
         }
+        // if (type = 3) {
+        //     // animation here
+        // }
         return;
     }
     
     method int getY0() {
         return y0;
+    }
+    
+    method int getType() {
+        return type;
     }
     
     method boolean sameHeight(int yy0, int yy1) {
