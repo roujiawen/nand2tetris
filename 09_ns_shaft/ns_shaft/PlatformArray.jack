@@ -37,7 +37,7 @@ class PlatformArray {
         
         let probType0 = 70; //%
         let probType1 = 15; //%
-        let probType2 = 15; //%
+        let probType2 = 18; //%
         
         let game = game_;
         
@@ -119,6 +119,7 @@ class PlatformArray {
             if (~success) {
                 // delete platform
                 do plt.dispose();
+                do game.incScore();
                 let p1 = p1 + 1;
                 let size = size - 1;
                 if (p1 = maxSize) {

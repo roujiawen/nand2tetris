@@ -4,6 +4,7 @@ class Platform {
     field int width, height, x0, y0, upInc;
     field Conveyor conveyor;
     field int dissolveCountDown, dissolvePeriod;
+    field int bounceCountDown, bouncePeriod;
     field int frameY0;
     field Game game;
     
@@ -21,6 +22,8 @@ class Platform {
         let frameY0 = frame.getY0();
         let dissolveCountDown = -1;
         let dissolvePeriod = 100;
+        let bounceCountDown = 0;
+        let bouncePeriod = 9;
         let game = game_;
         return this;
     }
@@ -109,6 +112,77 @@ class Platform {
         
         if (type = 3) {
             do Screen.setColor(false);
+            if (bounceCountDown>6) {
+                do Screen.drawLine(x0, y0+2, x0+width, y0+2);
+                do Screen.drawLine(x0, y0+height, x0+width, y0+height);
+                
+                do Screen.drawLine(x0+4, y0+3, x0+13, y0+height-1);
+                do Screen.drawLine(x0+4, y0+height-1, x0+13, y0+3);
+                do Screen.drawLine(x0+3, y0+3, x0+0, y0+3);
+                do Screen.drawLine(x0+3, y0+height-1, x0+0, y0+height-1);
+                
+                do Screen.drawLine(x0+20, y0+3, x0+29, y0+height-1);
+                do Screen.drawLine(x0+20, y0+height-1, x0+29, y0+3);
+                do Screen.drawLine(x0+19, y0+3, x0+16, y0+3);
+                do Screen.drawLine(x0+19, y0+height-1, x0+16, y0+height-1);
+                
+                
+                do Screen.drawLine(x0+width-9, y0+3, x0+width, y0+height-1);
+                do Screen.drawLine(x0+width-9, y0+height-1, x0+width, y0+3);
+                do Screen.drawLine(x0+width-10, y0+3, x0+width-13, y0+3);
+                do Screen.drawLine(x0+width-10, y0+height-1, x0+width-13, y0+height-1);
+                return;
+            }
+            
+            if (bounceCountDown>3) {
+                do Screen.drawLine(x0, y0, x0+width, y0);
+                do Screen.drawLine(x0, y0+height, x0+width, y0+height);
+                
+                do Screen.drawLine(x0+2, y0+1, x0+13, y0+height-1);
+                do Screen.drawLine(x0+2, y0+height-1, x0+13, y0+1);
+                do Screen.drawPixel(x0+1, y0+1);
+                do Screen.drawPixel(x0+1, y0+height-1);
+                do Screen.drawPixel(x0+0, y0+1);
+                do Screen.drawPixel(x0+0, y0+height-1);
+                
+                do Screen.drawLine(x0+18, y0+1, x0+29, y0+height-1);
+                do Screen.drawLine(x0+18, y0+height-1, x0+29, y0+1);
+                do Screen.drawPixel(x0+17, y0+1);
+                do Screen.drawPixel(x0+17, y0+height-1);
+                do Screen.drawPixel(x0+16, y0+1);
+                do Screen.drawPixel(x0+16, y0+height-1);
+                
+                do Screen.drawLine(x0+width-11, y0+1, x0+width, y0+height-1);
+                do Screen.drawLine(x0+width-11, y0+height-1, x0+width, y0+1);
+                do Screen.drawPixel(x0+width-12, y0+1);
+                do Screen.drawPixel(x0+width-12, y0+height-1);
+                do Screen.drawPixel(x0+width-13, y0+1);
+                do Screen.drawPixel(x0+width-13, y0+height-1);
+                return;
+            }
+            
+            if (bounceCountDown>0) {
+                do Screen.drawLine(x0, y0-2, x0+width, y0-2);
+                do Screen.drawLine(x0, y0+height, x0+width, y0+height);
+                
+                do Screen.drawLine(x0+2, y0-1, x0+13, y0+height-1);
+                do Screen.drawLine(x0+2, y0+height-1, x0+13, y0-1);
+                do Screen.drawPixel(x0+1, y0-1);
+                do Screen.drawPixel(x0+1, y0+height-1);
+                do Screen.drawPixel(x0+0, y0-1);
+                do Screen.drawPixel(x0+0, y0+height-1);
+                
+                do Screen.drawLine(x0+18, y0-1, x0+29, y0+height-1);
+                do Screen.drawLine(x0+18, y0+height-1, x0+29, y0-1);
+                do Screen.drawPixel(x0+17, y0-1);
+                do Screen.drawPixel(x0+17, y0+height-1);
+                
+                do Screen.drawLine(x0+width-11, y0-1, x0+width, y0+height-1);
+                do Screen.drawLine(x0+width-11, y0+height-1, x0+width, y0-1);
+                do Screen.drawPixel(x0+width-12, y0-1);
+                do Screen.drawPixel(x0+width-12, y0+height-1);
+                return;
+            }
             do Screen.drawLine(x0, y0, x0+width, y0);
             do Screen.drawLine(x0, y0+height, x0+width, y0+height);
             
@@ -133,8 +207,6 @@ class Platform {
             do Screen.drawPixel(x0+width-13, y0+1);
             do Screen.drawPixel(x0+width-13, y0+height-1);
             
-            // do Screen.drawLine(x0+5, y0, x0+width-5, y0+height);
-            // do Screen.drawLine(x0+5, y0+height, x0+width-5, y0);
             return;
         }
         
@@ -145,6 +217,10 @@ class Platform {
         let y0 = y0 - (upInc * conveyor.move());
         if ((type = 2) & (dissolveCountDown > 0)) {
             let dissolveCountDown = dissolveCountDown - 1;
+        }
+        
+        if ((type = 3) & (bounceCountDown > 0)) {
+            let bounceCountDown = bounceCountDown - 1;
         }
         if (y0 < frameY0) {
             return false;
@@ -163,9 +239,9 @@ class Platform {
         if (type = 2) {
             let dissolveCountDown = dissolvePeriod;
         }
-        // if (type = 3) {
-        //     // animation here
-        // }
+        if (type = 3) {
+            let bounceCountDown = bouncePeriod;
+        }
         return;
     }
     

@@ -36,7 +36,7 @@ class Player {
         let leftRightState = 0;
         let animationTickTock = 0;
         
-        let riseInterval = 40;
+        let riseInterval = 45;
         let riseCount = 0;
         
         return this;
@@ -84,16 +84,31 @@ class Player {
         let nextPlatform = platforms.get(whichPlatform);
         
         if (riseCount > 0) {
-            if (riseCount>10) {
+            if (riseCount>25) {
                 let y0 = y0 - (yInc * 2);
             } else {
-                if (riseCount>3) {
+                if (riseCount>12) {
                     let y0 = y0 - yInc;
                 }
             }
             let onPlatform = false;
-            // hit top?
+            let foot = y0+height;
+            let p1 = platforms.getP1();
+            let p2 = platforms.getP2();
+            
             // roll back nextPlatform/whichPlatform
+            while ((nextPlatform.getY0() > foot) & (~(whichPlatform =p1))) {
+                // go to the previous platform
+                // 1. (if index is at 0 ) set index to MaxSize
+                if (whichPlatform = 0) {
+                    let whichPlatform = platforms.getMaxSize();
+                }
+                // 2. dec index
+                let whichPlatform = whichPlatform - 1;
+                // 3. update nextPlatform
+                let nextPlatform = platforms.get(whichPlatform);
+            }
+            
             let riseCount = riseCount - 1;
             return;
         }
@@ -134,7 +149,6 @@ class Player {
                 (cond2 & cond3) |
                 (cond3 & cond1)) {
                     let whichPlatform = whichPlatform + 1;
-                    do game.incScore();
                     if (whichPlatform = platforms.getMaxSize()) {
                         let whichPlatform = 0;
                     }
@@ -149,7 +163,6 @@ class Player {
                 // go to the next platform
                 // 1. inc index
                 let whichPlatform = whichPlatform + 1;
-                do game.incScore();
                 // 2. (if index is at MaxSize i.e. p2-p1-w ) set index to 0
                 if (whichPlatform = platforms.getMaxSize()) {
                     let whichPlatform = 0;
