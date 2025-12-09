@@ -1,18 +1,26 @@
 
 class Player {
     field int width, height, x0, y0, xInc, yInc, upInc, whichPlatform, numPlatforms;
+    field int frameX0, frameX1, frameY0, frameY1;
     field boolean onPlatform;
     field Frame frame;
     field PlatformArray platforms;
     field Conveyor conveyor;
-    field GameStatus gameStatus;
+    field Game game;
     field int leftRightState; // 0: neutral; 1: left; 2: right
     field int animationTickTock;
     field int riseInterval;
     field int riseCount;
     
-    constructor Player new(int x0_, int y0_, int upInc_, PlatformArray platforms_, Frame frame_, Conveyor conveyor_, GameStatus gameStatus_){
-        let frame = frame_;
+    constructor Player new(int x0_, int y0_, int upInc_, Game game_){
+        var Frame frame;
+        let frame = game_.getFrame();
+        
+        let frameX0 = frame.getX0();
+        let frameX1 = frame.getX1();
+        let frameY0 = frame.getY0();
+        let frameY1 = frame.getY1();
+        
         let width = 10;
         let height = 11;
         let xInc = 1;
@@ -22,9 +30,9 @@ class Player {
         let y0 = y0_;
         let onPlatform = false;
         let whichPlatform = 0;
-        let platforms = platforms_;
-        let conveyor = conveyor_;
-        let gameStatus = gameStatus_;
+        let platforms = game_.getPlatforms();
+        let conveyor = game_.getConveyor();
+        let game = game_;
         let leftRightState = 0;
         let animationTickTock = 0;
         
@@ -36,8 +44,8 @@ class Player {
     
     method void moveUp() {
         let y0 = y0 - (upInc * conveyor.move());
-        if (y0 < frame.getY0()) {
-            do gameStatus.setGameOver(true);
+        if (y0 < frameY0) {
+            do game.setGameOver(true);
         }
         return;
     }
@@ -47,13 +55,13 @@ class Player {
         let key = Keyboard.keyPressed();
         if (key=130) {
             // left 
-            let x0 = Math.max(x0 - xInc, frame.getX0()+1);
+            let x0 = Math.max(x0 - xInc, frameX0+1);
             let leftRightState = 1;
             return;
         }
         if (key=132) {
             // right
-            let x0 = Math.min(x0 + xInc, frame.getX1()-width);
+            let x0 = Math.min(x0 + xInc, frameX1-width);
             let leftRightState = 2;
             return;
         }
@@ -98,8 +106,8 @@ class Player {
                 let y0 = y0 + yInc;
                 // detect falling out of range
                 let foot = y0+height;
-                if (foot > frame.getY1()) {
-                    do gameStatus.setGameOver(true);
+                if (foot > frameY1) {
+                    do game.setGameOver(true);
                     return;
                 }
             }
@@ -108,8 +116,8 @@ class Player {
             let y0 = y0 + yInc;
             let foot = y0+height;
             // detect falling out of range
-            if (foot > frame.getY1()) {
-                do gameStatus.setGameOver(true);
+            if (foot > frameY1) {
+                do game.setGameOver(true);
                 return;
             }
             
@@ -126,7 +134,7 @@ class Player {
                 (cond2 & cond3) |
                 (cond3 & cond1)) {
                     let whichPlatform = whichPlatform + 1;
-                    do gameStatus.incScore();
+                    do game.incScore();
                     if (whichPlatform = platforms.getMaxSize()) {
                         let whichPlatform = 0;
                     }
@@ -141,7 +149,7 @@ class Player {
                 // go to the next platform
                 // 1. inc index
                 let whichPlatform = whichPlatform + 1;
-                do gameStatus.incScore();
+                do game.incScore();
                 // 2. (if index is at MaxSize i.e. p2-p1-w ) set index to 0
                 if (whichPlatform = platforms.getMaxSize()) {
                     let whichPlatform = 0;

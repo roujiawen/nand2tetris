@@ -9,57 +9,60 @@ class Main {
         var Game game;
         var int i, numPlatforms;
         var Conveyor conveyor;
-        var GameStatus gameStatus;
+        var Game game;
         
-        let gameStatus = GameStatus.new();
+        let game = Game.new();
         
-        let f = Frame.new(166, 5, gameStatus);
+        let f = Frame.new(166, 5, game);
+        do game.setFrame(f);
         do f.draw();
         
         let conveyor = Conveyor.new();
-        
+        do game.setConveyor(conveyor);
         
         let i = 0;
-        let platforms = PlatformArray.new(45, 6, f, 1, conveyor, gameStatus);
+        let platforms = PlatformArray.new(45, 6, 1, game);
+        do game.setPlatforms(platforms);
         while (i < 10) {
             do platforms.newAt(50+((180/10)*i), 0);
             let i = i + 1;
         }
         do platforms.draw();
         
-        let player = Player.new(166+36, 5, 1, platforms, f, conveyor, gameStatus);
+        let player = Player.new(166+36, 5, 1, game);
+        do game.setPlayer(player);
         
-        let game = Game.new(f, player, platforms, conveyor);
         
         while (true) {
-            if (gameStatus.getGameOver()) {
+            if (game.getGameOver()) {
             
                 do Output.moveCursor(3, 2);
                 do Output.printString("GAME OVER!");
                 do Sys.wait(5000);
-                do gameStatus.setGameOver(false);
+                do game.setGameOver(false);
                 
                 // game setup
                 do Screen.clearScreen();
-                let gameStatus = GameStatus.new();
+                let game = Game.new();
                 
-                let f = Frame.new(166, 5, gameStatus);
+                let f = Frame.new(166, 5, game);
+                do game.setFrame(f);
                 do f.draw();
                 
                 let conveyor = Conveyor.new();
-                
+                do game.setConveyor(conveyor);
                 
                 let i = 0;
-                let platforms = PlatformArray.new(45, 6, f, 1, conveyor, gameStatus);
+                let platforms = PlatformArray.new(45, 6, 1, game);
+                do game.setPlatforms(platforms);
                 while (i < 10) {
                     do platforms.newAt(50+((180/10)*i), 0);
                     let i = i + 1;
                 }
                 do platforms.draw();
                 
-                let player = Player.new(166+36, 5, 1, platforms, f, conveyor, gameStatus);
-                
-                let game = Game.new(f, player, platforms, conveyor);
+                let player = Player.new(166+36, 5, 1, game);
+                do game.setPlayer(player);
                 
             } else {
                 do game.advance();

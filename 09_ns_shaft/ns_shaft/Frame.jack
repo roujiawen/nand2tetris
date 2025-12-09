@@ -1,14 +1,14 @@
 /** Represent the game frame */
 class Frame {
     field int width, height, x0, y0;
-    field GameStatus gameStatus;
+    field Game game;
     
-    constructor Frame new(int x0_, int y0_, GameStatus gameStatus_){
+    constructor Frame new(int x0_, int y0_, Game game_){
         let width = 183;
         let height = 250;
         let x0 = x0_;
         let y0 = y0_;
-        let gameStatus = gameStatus_;
+        let game = game_;
         do setup();
         return this;
     }
@@ -117,7 +117,7 @@ class Frame {
         
         // Score
         do Output.moveCursor(1,2+7);
-        do Output.printInt(gameStatus.getScore());
+        do Output.printInt(game.getScore());
         
         return;
     }

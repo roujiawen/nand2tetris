@@ -4,21 +4,24 @@ class Platform {
     field int width, height, x0, y0, upInc;
     field Conveyor conveyor;
     field int dissolveCountDown, dissolvePeriod;
-    field Frame frame;
-    field GameStatus gameStatus;
+    field int frameY0;
+    field Game game;
     
-    constructor Platform new(int type_, int x0_, int y0_, int width_, int height_, int upInc_, Conveyor conveyor_, Frame frame_, GameStatus gameStatus_){
+    constructor Platform new(int type_, int x0_, int y0_, int width_, int height_, int upInc_, Game game_){
+        var Frame frame;
+        let frame = game_.getFrame();
+        
         let type = type_; // 0: plain, 1: spiky, 2: dissolving, 3: bouncing
         let width = width_;
         let height = height_;
         let x0 = x0_;
         let y0 = y0_;
         let upInc = upInc_;
-        let conveyor = conveyor_;
-        let frame = frame_;
+        let conveyor = game_.getConveyor();
+        let frameY0 = frame.getY0();
         let dissolveCountDown = -1;
         let dissolvePeriod = 100;
-        let gameStatus = gameStatus_;
+        let game = game_;
         return this;
     }
         
@@ -143,7 +146,7 @@ class Platform {
         if ((type = 2) & (dissolveCountDown > 0)) {
             let dissolveCountDown = dissolveCountDown - 1;
         }
-        if (y0 < frame.getY0()) {
+        if (y0 < frameY0) {
             return false;
         }
         return true;
@@ -155,7 +158,7 @@ class Platform {
     
     method void onStanding() {
         if (type = 1) {
-            do gameStatus.setGameOver(true);
+            do game.setGameOver(true);
         }
         if (type = 2) {
             let dissolveCountDown = dissolvePeriod;

@@ -4,12 +4,13 @@ class Game {
     field Player player;
     field PlatformArray platforms;
     field Conveyor conveyor;
+    field int score, scoreStep;
+    field boolean gameOver;
     
-    constructor Game new(Frame frame_, Player player_, PlatformArray platforms_, Conveyor conveyor_){
-        let frame = frame_;
-        let player = player_;
-        let platforms = platforms_;
-        let conveyor = conveyor_;
+    constructor Game new(){
+        let score = 0;
+        let scoreStep = 1;
+        let gameOver = false;
         return this;
     }
         
@@ -33,6 +34,59 @@ class Game {
         
         do conveyor.advance();
         
+        return;
+    }
+    
+    method void setFrame(Frame frame_) {
+        let frame = frame_;
+        return;
+    }
+    
+    method void setPlayer(Player player_) {
+        let player = player_;
+        return;
+    }
+    
+    method void setPlatforms(PlatformArray platforms_) {
+        let platforms = platforms_;
+        return;
+    }
+    
+    method void setConveyor(Conveyor conveyor_) {
+        let conveyor = conveyor_;
+        return;
+    }
+    
+    method Frame getFrame() {
+        return frame;
+    }
+    
+    method Player getPlayer() {
+        return player;
+    }
+    
+    method PlatformArray getPlatforms() {
+        return platforms;
+    }
+    
+    method Conveyor getConveyor() {
+        return conveyor;
+    }
+    
+    method int getScore() {
+        return score;
+    }
+    
+    method void incScore() {
+        let score = score + scoreStep;
+        return;
+    }
+    
+    method boolean getGameOver() {
+        return gameOver;
+    }
+    method void setGameOver(boolean b) {
+        let gameOver = b;
         return;
     }
 
