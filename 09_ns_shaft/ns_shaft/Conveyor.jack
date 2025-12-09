@@ -1,27 +1,43 @@
 
 class Conveyor {
-    field int slowDownFactor;
-    field int slowDownCount;
+    field int conveyorCycle;
+    field int conveyorCount;
+    field int animationCycle;
+    field int animationCount;
     
     constructor Conveyor new(){
-        let slowDownFactor = 5;
-        let slowDownCount = 0;
+        let conveyorCycle = 5;
+        let conveyorCount = 0;
+        let animationCycle = 7;
+        let animationCount = 0;
+        
         return this;
     }
     
     method void advance() {
-        let slowDownCount = slowDownCount + 1;
-        if (slowDownCount>slowDownFactor) {
-            let slowDownCount = slowDownCount - slowDownFactor;
+        let conveyorCount = conveyorCount + 1;
+        if (conveyorCount>conveyorCycle) {
+            let conveyorCount = conveyorCount - conveyorCycle;
+        }
+        let animationCount = animationCount + 1;
+        if (animationCount>animationCycle) {
+            let animationCount = animationCount - animationCycle;
         }
         return;
     }
     
     method int move() {
-        if (slowDownCount=slowDownFactor) {
+        if (conveyorCount=conveyorCycle) {
             return 1;
         }
         return 0;
+    }
+    
+    method int animationTick() {
+      if (animationCount=animationCycle) {
+          return 1;
+      }
+      return 0;
     }
 
 }

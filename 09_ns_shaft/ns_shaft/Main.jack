@@ -31,11 +31,36 @@ class Main {
         
         let game = Game.new(f, player, platforms, conveyor);
         
-        let i = 0;
         while (true) {
             if (gameStatus.getGameOver()) {
-                do Output.printString("GAME OVER! ");
-                do Sys.wait(1000);
+            
+                do Output.moveCursor(3, 2);
+                do Output.printString("GAME OVER!");
+                do Sys.wait(5000);
+                do gameStatus.setGameOver(false);
+                
+                // game setup
+                do Screen.clearScreen();
+                let gameStatus = GameStatus.new();
+                
+                let f = Frame.new(166, 5, gameStatus);
+                do f.draw();
+                
+                let conveyor = Conveyor.new();
+                
+                
+                let i = 0;
+                let platforms = PlatformArray.new(45, 6, f, 1, conveyor, gameStatus);
+                while (i < 10) {
+                    do platforms.newAt(50+((180/10)*i), 0);
+                    let i = i + 1;
+                }
+                do platforms.draw();
+                
+                let player = Player.new(166+36, 5, 1, platforms, f, conveyor, gameStatus);
+                
+                let game = Game.new(f, player, platforms, conveyor);
+                
             } else {
                 do game.advance();
                 do Sys.wait(10);

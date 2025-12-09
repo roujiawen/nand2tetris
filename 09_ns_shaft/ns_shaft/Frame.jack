@@ -4,11 +4,12 @@ class Frame {
     field GameStatus gameStatus;
     
     constructor Frame new(int x0_, int y0_, GameStatus gameStatus_){
-        let width = 180;
+        let width = 183;
         let height = 250;
         let x0 = x0_;
         let y0 = y0_;
         let gameStatus = gameStatus_;
+        do setup();
         return this;
     }
     method int getX0() {
@@ -30,19 +31,46 @@ class Frame {
     method int getY1() {
         return y0+height;
     }
-    method void draw() {
-        var int dx;
     
+    method void setup() {
+        var int dx;
+        do Output.moveCursor(1, 2);
+        do Output.printString("Score: ");
+        
         do Screen.setColor(true);
         do Screen.drawRectangle(x0, y0-5, x0+width, y0+height);
         
-        do Screen.setColor(false);
-        do Screen.drawLine(x0-1, y0-5, x0-1, y0+height); // static
-        do Screen.drawLine(x0+width+1, y0, x0+width+1, y0+height); // static
+        // border
+        do Screen.setColor(true);
+        do Screen.drawLine(x0-5, y0-5, x0-5, y0+height); // static
+        do Screen.drawLine(x0+width+5, y0-5, x0+width+5, y0+height); // static
+        do Screen.drawLine(x0-6, y0-5, x0-6, y0+height); // static
+        do Screen.drawLine(x0+width+6, y0-5, x0+width+6, y0+height); // static
+        let dx = 8;
+        while (dx < (height)) {
+            do Screen.drawPixel(x0-4, y0+dx);
+            do Screen.drawPixel(x0+width+4, y0+dx);
+            do Screen.drawPixel(x0-3, y0+dx);
+            do Screen.drawPixel(x0+width+3, y0+dx);
+            do Screen.drawPixel(x0-2, y0+dx);
+            do Screen.drawPixel(x0+width+2, y0+dx);
+            do Screen.drawPixel(x0-1, y0+dx);
+            do Screen.drawPixel(x0+width+1, y0+dx);
+            let dx = dx+1;
+            do Screen.drawPixel(x0-4, y0+dx);
+            do Screen.drawPixel(x0+width+4, y0+dx);
+            do Screen.drawPixel(x0-3, y0+dx);
+            do Screen.drawPixel(x0+width+3, y0+dx);
+            do Screen.drawPixel(x0-2, y0+dx);
+            do Screen.drawPixel(x0+width+2, y0+dx);
+            do Screen.drawPixel(x0-1, y0+dx);
+            do Screen.drawPixel(x0+width+1, y0+dx);
+            let dx = dx+15;
+        }
         
         // teeth
         do Screen.setColor(false);
-        let dx = 0;
+        let dx = 1;
         while (dx < (width-2)) {
             do Screen.drawPixel(x0+dx+1, y0-4);
             do Screen.drawPixel(x0+dx+2, y0-4);
@@ -68,6 +96,28 @@ class Frame {
             do Screen.drawPixel(x0+dx+3, y0+1);
             let dx = dx+7;
         }
+        
+        return;
+    }
+    
+    method void draw() {
+        var int dx;
+    
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x0, y0+0, x0+width, y0+height);
+        
+        // teeth, partially static
+        do Screen.setColor(false);
+        let dx = 1;
+        while (dx < (width-2)) {
+            do Screen.drawPixel(x0+dx+3, y0+0);
+            do Screen.drawPixel(x0+dx+3, y0+1);
+            let dx = dx+7;
+        }
+        
+        // Score
+        do Output.moveCursor(1,2+7);
+        do Output.printInt(gameStatus.getScore());
         
         return;
     }

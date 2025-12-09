@@ -27,7 +27,7 @@ class Game {
         do player.moveUp();
         
         do platforms.moveUp();
-        do platforms.addNewBottom(10);
+        do platforms.addNewBottom(50);
         
         
         

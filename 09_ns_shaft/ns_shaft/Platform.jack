@@ -8,7 +8,7 @@ class Platform {
     field GameStatus gameStatus;
     
     constructor Platform new(int type_, int x0_, int y0_, int width_, int height_, int upInc_, Conveyor conveyor_, Frame frame_, GameStatus gameStatus_){
-        let type = type_; // 0: plain, 1: spiky, 2: dissolving
+        let type = type_; // 0: plain, 1: spiky, 2: dissolving, 3: bouncing
         let width = width_;
         let height = height_;
         let x0 = x0_;
@@ -27,6 +27,11 @@ class Platform {
         if (type = 0) {
             do Screen.setColor(false);
             do Screen.drawRectangle(x0, y0+1, x0+width, y0+height-1);
+            do Screen.setColor(true);
+            do Screen.drawPixel(x0, y0+1);
+            do Screen.drawPixel(x0, y0+height-1);
+            do Screen.drawPixel(x0+width, y0+1);
+            do Screen.drawPixel(x0+width, y0+height-1);
             return;
         }
         if (type = 1) {
@@ -51,31 +56,32 @@ class Platform {
         }
         if (type = 2) {
             if ((dissolveCountDown > (dissolvePeriod/2)) | (dissolveCountDown = -1)) {
+                // do Screen.setColor(true);
+                // do Screen.drawRectangle(x0, y0, x0+width, y0+height);
                 do Screen.setColor(false);
-                do Screen.drawRectangle(x0, y0, x0+width, y0+height);
-                do Screen.setColor(true);
-                do Screen.drawRectangle(x0+1, y0+1, x0+14, y0+height-1);
-                do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height-1);
-                do Screen.drawRectangle(x0+31, y0+1, x0+width-1, y0+height-1);
+                do Screen.drawRectangle(x0+1, y0+1, x0+13, y0+height);
+                do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height);
+                do Screen.drawRectangle(x0+32, y0+1, x0+width-1, y0+height);
                 return;
             }
             
             if (dissolveCountDown > 0) {
+            // do Screen.setColor(true);
+            // do Screen.drawRectangle(x0, y0, x0+width, y0+height);
             do Screen.setColor(false);
-            do Screen.drawRectangle(x0, y0, x0+width, y0+height);
-            do Screen.setColor(true);
-            do Screen.drawRectangle(x0+1, y0+1, x0+14, y0+height-1);
-            do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height-1);
-            do Screen.drawRectangle(x0+31, y0+1, x0+width-1, y0+height-1);
+            do Screen.drawRectangle(x0+1, y0+1, x0+13, y0+height);
+            do Screen.drawRectangle(x0+16, y0+1, x0+29, y0+height);
+            do Screen.drawRectangle(x0+32, y0+1, x0+width-1, y0+height);
             
-            do Screen.drawPixel(x0+7+1, y0);
-            do Screen.drawPixel(x0+7-1, y0+6);
-            do Screen.drawPixel(x0+23+1, y0);
+            do Screen.setColor(true);
+            
+            // do Screen.drawPixel(x0+8+1, y0);
+            do Screen.drawPixel(x0+8-1, y0+6);
+            // do Screen.drawPixel(x0+23+1, y0);
             do Screen.drawPixel(x0+23-1, y0+6);
-            do Screen.drawPixel(x0+38+1, y0);
+            // do Screen.drawPixel(x0+38+1, y0);
             do Screen.drawPixel(x0+38-1, y0+6);
             
-            do Screen.setColor(false);
             do Screen.drawPixel(x0+8+0, y0+1);
             do Screen.drawPixel(x0+8-1, y0+2);
             do Screen.drawPixel(x0+8+0, y0+3);
