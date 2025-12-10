@@ -203,304 +203,32 @@ class Player {
         
         if (~onPlatform) {
             if (animationTickTock = 0) {
-                do drawFallTick();
+                do DrawPlayer.fallTick(x0, y0);
             } else {
-                do drawFallTock();
+                do DrawPlayer.fallTock(x0, y0);
             }  
             return;
         }
         
         if (leftRightState=0) { 
-            do drawNeutral();
+            do DrawPlayer.neutral(x0, y0);
             return;
         }
         
         if (leftRightState=1) {
             if (animationTickTock = 0) {
-                do drawLeftTick();
+                do DrawPlayer.leftTick(x0, y0);
             } else {
-                do drawLeftTock();
+                do DrawPlayer.leftTock(x0, y0);
             }  
         } else {
             if (animationTickTock = 0) {
-                do drawRightTick();
+                do DrawPlayer.rightTick(x0, y0);
             } else {
-                do drawRightTock();
+                do DrawPlayer.rightTock(x0, y0);
             }  
         }
-        
-        // do Screen.setColor(false);
-        // do Screen.drawRectangle(x0, y0, x0+width, y0+height);
-        // do Screen.setColor(true);
-        // do Screen.drawRectangle(x0+1, y0+1, x0+width-1, y0+height-1);
         return;
     }
-    
-    method void drawNeutral() {
-        //Head
-        do Screen.drawRectangle(x0+2, y0, x0+7, y0+2);
-        do Screen.drawPixel(x0+1, y0+1);
-        do Screen.drawPixel(x0+1, y0+2);
-        do Screen.drawPixel(x0+8, y0+1);
-        do Screen.drawPixel(x0+8, y0+2);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+8);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+1, y0+5);
-        do Screen.drawPixel(x0+1, y0+6);
-        do Screen.drawPixel(x0+0, y0+6);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+8, y0+5);
-        do Screen.drawPixel(x0+8, y0+6);
-        do Screen.drawPixel(x0+9, y0+6);
-        //L Foot
-        do Screen.drawPixel(x0+3, y0+9);
-        do Screen.drawPixel(x0+2, y0+8);
-        do Screen.drawPixel(x0+2, y0+9);
-        do Screen.drawPixel(x0+2, y0+10);
-        do Screen.drawPixel(x0+1, y0+10);
-        //R Foot
-        do Screen.drawPixel(x0+6, y0+9);
-        do Screen.drawPixel(x0+7, y0+8);
-        do Screen.drawPixel(x0+7, y0+9);
-        do Screen.drawPixel(x0+7, y0+10);
-        do Screen.drawPixel(x0+8, y0+10);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+3, y0+1);
-        do Screen.drawPixel(x0+6, y0+1);
-        return;
-    }
-    
-    method void drawFallTick() {
-        //Head
-        do Screen.drawRectangle(x0+2, y0, x0+7, y0+2);
-        do Screen.drawPixel(x0+1, y0+1);
-        do Screen.drawPixel(x0+1, y0+2);
-        do Screen.drawPixel(x0+8, y0+1);
-        do Screen.drawPixel(x0+8, y0+2);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+8);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+1, y0+5);
-        do Screen.drawPixel(x0+1, y0+6);
-        do Screen.drawPixel(x0+0, y0+6);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+8, y0+5);
-        do Screen.drawPixel(x0+8, y0+6);
-        do Screen.drawPixel(x0+9, y0+6);
-        //L Foot
-        do Screen.drawPixel(x0+2, y0+8);
-        do Screen.drawPixel(x0+2, y0+9);
-        do Screen.drawPixel(x0+1, y0+8);
-        do Screen.drawPixel(x0+1, y0+9);
-        do Screen.drawPixel(x0+0, y0+9);
-        //R Foot
-        do Screen.drawPixel(x0+7, y0+8);
-        do Screen.drawPixel(x0+7, y0+9);
-        do Screen.drawPixel(x0+8, y0+8);
-        do Screen.drawPixel(x0+8, y0+9);
-        do Screen.drawPixel(x0+9, y0+9);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+3, y0+1);
-        do Screen.drawPixel(x0+6, y0+1);
-        return;
-    }
-    
-    method void drawFallTock() {
-        //Head
-        do Screen.drawRectangle(x0+2, y0, x0+7, y0+2);
-        do Screen.drawPixel(x0+1, y0+1);
-        do Screen.drawPixel(x0+1, y0+2);
-        do Screen.drawPixel(x0+8, y0+1);
-        do Screen.drawPixel(x0+8, y0+2);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+8);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+1, y0+4);
-        do Screen.drawPixel(x0+1, y0+5);
-        do Screen.drawPixel(x0+0, y0+3);
-        do Screen.drawPixel(x0+0, y0+4);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+8, y0+4);
-        do Screen.drawPixel(x0+8, y0+5);
-        do Screen.drawPixel(x0+9, y0+3);
-        do Screen.drawPixel(x0+9, y0+4);
-        //L Foot
-        do Screen.drawPixel(x0+2, y0+9);
-        do Screen.drawPixel(x0+3, y0+9);
-        do Screen.drawPixel(x0+2, y0+8);
-        do Screen.drawPixel(x0+3, y0+10);
-        //R Foot
-        do Screen.drawPixel(x0+7, y0+9);
-        do Screen.drawPixel(x0+7, y0+8);
-        do Screen.drawPixel(x0+6, y0+9);
-        do Screen.drawPixel(x0+6, y0+10);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+3, y0+1);
-        do Screen.drawPixel(x0+6, y0+1);
-        return;
-    }
-    
-    method void drawLeftTick() {
-        //Head
-        do Screen.drawRectangle(x0+2, y0, x0+6, y0+2);
-        do Screen.drawPixel(x0+7, y0+1);
-        do Screen.drawPixel(x0+7, y0+2);
-        do Screen.drawPixel(x0+1, y0+0);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+8);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+2, y0+6);
-        do Screen.drawPixel(x0+1, y0+6);
-        do Screen.drawPixel(x0+1, y0+7);
-        do Screen.drawPixel(x0+0, y0+7);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+7, y0+6);
-        do Screen.drawPixel(x0+8, y0+6);
-        do Screen.drawPixel(x0+8, y0+7);
-        do Screen.drawPixel(x0+9, y0+7);
-        //L Foot
-        do Screen.drawPixel(x0+3, y0+9);
-        do Screen.drawPixel(x0+2, y0+8);
-        do Screen.drawPixel(x0+2, y0+9);
-        do Screen.drawPixel(x0+1, y0+10);
-        do Screen.drawPixel(x0+2, y0+10);
-        do Screen.drawPixel(x0+3, y0+10);
-        //R Foot
-        do Screen.drawPixel(x0+6, y0+9);
-        do Screen.drawPixel(x0+7, y0+8);
-        do Screen.drawPixel(x0+7, y0+9);
-        do Screen.drawPixel(x0+5, y0+10);
-        do Screen.drawPixel(x0+6, y0+10);
-        do Screen.drawPixel(x0+7, y0+10);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+3, y0+1);
-        return;
-    }
-    
-    method void drawLeftTock() {
-        //Head
-        do Screen.drawRectangle(x0+2, y0, x0+6, y0+2);
-        do Screen.drawPixel(x0+7, y0+1);
-        do Screen.drawPixel(x0+7, y0+2);
-        do Screen.drawPixel(x0+1, y0+0);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+10);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+2, y0+6);
-        do Screen.drawPixel(x0+2, y0+7);
-        do Screen.drawPixel(x0+1, y0+7);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+7, y0+6);
-        do Screen.drawPixel(x0+7, y0+7);
-        do Screen.drawPixel(x0+8, y0+7);
-        //L Foot
-        do Screen.drawPixel(x0+2, y0+10);
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+4, y0+9);
-        //R Foot
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+3, y0+1);
-        return;
-    }
-    
-    method void drawRightTick() {
-        //Head
-        do Screen.drawRectangle(x0+3, y0, x0+7, y0+2);
-        do Screen.drawPixel(x0+2, y0+1);
-        do Screen.drawPixel(x0+2, y0+2);
-        do Screen.drawPixel(x0+8, y0+0);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+8);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+2, y0+6);
-        do Screen.drawPixel(x0+1, y0+6);
-        do Screen.drawPixel(x0+1, y0+7);
-        do Screen.drawPixel(x0+0, y0+7);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+7, y0+6);
-        do Screen.drawPixel(x0+8, y0+6);
-        do Screen.drawPixel(x0+8, y0+7);
-        do Screen.drawPixel(x0+9, y0+7);
-        //L Foot
-        do Screen.drawPixel(x0+3, y0+9);
-        do Screen.drawPixel(x0+2, y0+8);
-        do Screen.drawPixel(x0+2, y0+9);
-        do Screen.drawPixel(x0+2, y0+10);
-        do Screen.drawPixel(x0+3, y0+10);
-        do Screen.drawPixel(x0+4, y0+10);
-        //R Foot
-        do Screen.drawPixel(x0+6, y0+9);
-        do Screen.drawPixel(x0+6, y0+10);
-        do Screen.drawPixel(x0+7, y0+8);
-        do Screen.drawPixel(x0+7, y0+9);
-        do Screen.drawPixel(x0+7, y0+10);
-        do Screen.drawPixel(x0+8, y0+10);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+6, y0+1);
-        return;
-    }
-    
-    method void drawRightTock() {
-        //Head
-        do Screen.drawRectangle(x0+3, y0, x0+7, y0+2);
-        do Screen.drawPixel(x0+2, y0+1);
-        do Screen.drawPixel(x0+2, y0+2);
-        do Screen.drawPixel(x0+8, y0+0);
-        //Body
-        do Screen.drawRectangle(x0+3, y0+3, x0+6, y0+10);
-        //L Arm
-        do Screen.drawPixel(x0+2, y0+4);
-        do Screen.drawPixel(x0+2, y0+5);
-        do Screen.drawPixel(x0+2, y0+6);
-        do Screen.drawPixel(x0+2, y0+7);
-        do Screen.drawPixel(x0+1, y0+7);
-        //R Arm
-        do Screen.drawPixel(x0+7, y0+4);
-        do Screen.drawPixel(x0+7, y0+5);
-        do Screen.drawPixel(x0+7, y0+6);
-        do Screen.drawPixel(x0+7, y0+7);
-        do Screen.drawPixel(x0+8, y0+7);
-        //L Foot
-        //R Foot
-        do Screen.drawPixel(x0+7, y0+10);
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+5, y0+9);
-        // Eyes
-        do Screen.setColor(true);
-        do Screen.drawPixel(x0+6, y0+1);
-        return;
-    }
-
 
 }

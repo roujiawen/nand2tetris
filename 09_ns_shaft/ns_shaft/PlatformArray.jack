@@ -9,7 +9,7 @@ class PlatformArray {
     field Utils utils;
     field int coolOffPeriod;
     field int coolOffCount;
-    field int probType0, probType1, probType2;
+    field int probType0, probType1, probType2, probType3, probType4;
     field Game game;
     
     constructor PlatformArray new(int width_, int height_, int upInc_, Game game_){
@@ -36,8 +36,10 @@ class PlatformArray {
         let coolOffCount = 0;
         
         let probType0 = 70; //%
-        let probType1 = 15; //%
-        let probType2 = 18; //%
+        let probType1 = 25; //%
+        let probType2 = 33; //%
+        let probType3 = 50; //%
+        let probType4 = 50; //%
         
         let game = game_;
         
@@ -76,7 +78,15 @@ class PlatformArray {
                     if (utils.randInt(100) < probType2) {
                         do newAt(y1, 2);
                     } else {
-                        do newAt(y1, 3);
+                        if (utils.randInt(100) < probType3) {
+                            do newAt(y1, 3);
+                        } else {
+                            if (utils.randInt(100) < probType4) {
+                                do newAt(y1, 4);
+                            } else {
+                                do newAt(y1, 5);
+                            }
+                        }
                     }
                 }
             }
