@@ -152,11 +152,108 @@ class DrawPlatform {
         
     }
     
-    function void slidingLeft(int x0, int y0, int width, int height) {
+    function void leftArrow(int x, int y) {
+        do Screen.drawPixel(x+2, y+1);
+        do Screen.drawPixel(x+3, y+1);
+        do Screen.drawPixel(x+4, y+1);
+        do Screen.drawPixel(x+1, y+2);
+        do Screen.drawPixel(x+2, y+2);
+        do Screen.drawPixel(x+3, y+2);
+        do Screen.drawPixel(x+0, y+3);
+        do Screen.drawPixel(x+1, y+3);
+        do Screen.drawPixel(x+2, y+3);
+        do Screen.drawPixel(x+1, y+4);
+        do Screen.drawPixel(x+2, y+4);
+        do Screen.drawPixel(x+3, y+4);
+        do Screen.drawPixel(x+2, y+5);
+        do Screen.drawPixel(x+3, y+5);
+        do Screen.drawPixel(x+4, y+5);
+        return;
+    }
     
+    function void rightArrow(int x, int y) {
+        do Screen.drawPixel(x+0, y+1);
+        do Screen.drawPixel(x+1, y+1);
+        do Screen.drawPixel(x+2, y+1);
+        do Screen.drawPixel(x+1, y+2);
+        do Screen.drawPixel(x+2, y+2);
+        do Screen.drawPixel(x+3, y+2);
+        do Screen.drawPixel(x+2, y+3);
+        do Screen.drawPixel(x+3, y+3);
+        do Screen.drawPixel(x+4, y+3);
+        do Screen.drawPixel(x+1, y+4);
+        do Screen.drawPixel(x+2, y+4);
+        do Screen.drawPixel(x+3, y+4);
+        do Screen.drawPixel(x+0, y+5);
+        do Screen.drawPixel(x+1, y+5);
+        do Screen.drawPixel(x+2, y+5);
+        return;
+    }
+    
+    function void slidingLeft(int x0, int y0, int width, int height, int step) {
+        var int dx, x;
+        
         do Screen.setColor(false);
-        do Screen.drawLine(x0, y0, x0+width, y0);
-        do Screen.drawLine(x0, y0+height, x0+width, y0+height);
+        
+        do Screen.drawLine(x0+3, y0, x0+width-3, y0);
+        do Screen.drawLine(x0+3, y0+height, x0+width-3, y0+height);
+        
+        // left rounded border
+        do Screen.drawPixel(x0+2, y0+1);
+        do Screen.drawPixel(x0+1, y0+1);
+        do Screen.drawPixel(x0+0, y0+2);
+        do Screen.drawPixel(x0+0, y0+3);
+        do Screen.drawPixel(x0+0, y0+4);
+        do Screen.drawPixel(x0+1, y0+5);
+        do Screen.drawPixel(x0+2, y0+5);
+        
+        // right rounded border
+        do Screen.drawPixel(x0+width-2, y0+1);
+        do Screen.drawPixel(x0+width-1, y0+1);
+        do Screen.drawPixel(x0+width-0, y0+2);
+        do Screen.drawPixel(x0+width-0, y0+3);
+        do Screen.drawPixel(x0+width-0, y0+4);
+        do Screen.drawPixel(x0+width-1, y0+5);
+        do Screen.drawPixel(x0+width-2, y0+5);
+        
+        // Arrows
+        do DrawPlatform.leftArrow(x0+13-step, y0); // step: 0 to 12 inclusive
+        do DrawPlatform.leftArrow(x0+26-step, y0);
+        do DrawPlatform.leftArrow(x0+39-step, y0);
+        return;
+        
+    }
+    
+    function void slidingRight(int x0, int y0, int width, int height, int step) {
+        var int dx, x;
+        
+        do Screen.setColor(false);
+        
+        do Screen.drawLine(x0+3, y0, x0+width-3, y0);
+        do Screen.drawLine(x0+3, y0+height, x0+width-3, y0+height);
+        
+        // left rounded border
+        do Screen.drawPixel(x0+2, y0+1);
+        do Screen.drawPixel(x0+1, y0+1);
+        do Screen.drawPixel(x0+0, y0+2);
+        do Screen.drawPixel(x0+0, y0+3);
+        do Screen.drawPixel(x0+0, y0+4);
+        do Screen.drawPixel(x0+1, y0+5);
+        do Screen.drawPixel(x0+2, y0+5);
+        
+        // right rounded border
+        do Screen.drawPixel(x0+width-2, y0+1);
+        do Screen.drawPixel(x0+width-1, y0+1);
+        do Screen.drawPixel(x0+width-0, y0+2);
+        do Screen.drawPixel(x0+width-0, y0+3);
+        do Screen.drawPixel(x0+width-0, y0+4);
+        do Screen.drawPixel(x0+width-1, y0+5);
+        do Screen.drawPixel(x0+width-2, y0+5);
+        
+        // Arrows
+        do DrawPlatform.rightArrow(x0+1+step, y0); // step: 0 to 12 inclusive
+        do DrawPlatform.rightArrow(x0+14+step, y0);
+        do DrawPlatform.rightArrow(x0+27+step, y0);
         
         return;
         

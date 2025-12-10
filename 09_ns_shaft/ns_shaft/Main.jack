@@ -38,7 +38,7 @@ class Main {
             
                 do Output.moveCursor(3, 2);
                 do Output.printString("GAME OVER!");
-                do Sys.wait(5000);
+                do Sys.wait(4000);
                 do game.setGameOver(false);
                 
                 // game setup

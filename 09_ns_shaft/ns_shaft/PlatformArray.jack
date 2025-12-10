@@ -41,6 +41,12 @@ class PlatformArray {
         let probType3 = 50; //%
         let probType4 = 50; //%
         
+        // let probType0 = 0; //%
+        // let probType1 = 0; //%
+        // let probType2 = 0; //%
+        // let probType3 = 0; //%
+        // let probType4 = 50; //%
+        
         let game = game_;
         
         return this;

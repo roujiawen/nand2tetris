@@ -5,6 +5,7 @@ class Platform {
     field Conveyor conveyor;
     field int dissolveCountDown, dissolvePeriod;
     field int bounceCountDown, bouncePeriod;
+    field int slidingStep, slidingStepLimit, slidingSlowDown;
     field int frameY0;
     field Game game;
     
@@ -24,6 +25,9 @@ class Platform {
         let dissolvePeriod = 100;
         let bounceCountDown = 0;
         let bouncePeriod = 9;
+        let slidingStep = 0;
+        let slidingStepLimit = 12;
+        let slidingSlowDown = 3;
         let game = game_;
         return this;
     }
@@ -70,6 +74,16 @@ class Platform {
             return;
         }
         
+        if (type = 4) {
+            do DrawPlatform.slidingLeft(x0, y0, width, height, slidingStep/slidingSlowDown);
+            return;
+        }
+        
+        if (type = 5) {
+            do DrawPlatform.slidingRight(x0, y0, width, height, slidingStep/slidingSlowDown);
+            return;
+        }
+        
         return;
     }
     
@@ -81,6 +95,13 @@ class Platform {
         
         if ((type = 3) & (bounceCountDown > 0)) {
             let bounceCountDown = bounceCountDown - 1;
+        }
+        
+        if ((type = 4) | (type = 5)) {
+            let slidingStep = slidingStep + 1;
+            if (slidingStep > (slidingStepLimit*slidingSlowDown)) {
+                let slidingStep = 0;
+            }
         }
         if (y0 < frameY0) {
             return false;

@@ -7,6 +7,7 @@ class Player {
     field PlatformArray platforms;
     field Conveyor conveyor;
     field Game game;
+    field int slidingEffect, slidingInc;
     field int leftRightState; // 0: neutral; 1: left; 2: right
     field int animationTickTock;
     field int riseInterval;
@@ -23,7 +24,7 @@ class Player {
         
         let width = 10;
         let height = 11;
-        let xInc = 1;
+        let xInc = 2;
         let yInc = 1;
         let upInc = upInc_;
         let x0 = x0_;
@@ -33,6 +34,8 @@ class Player {
         let platforms = game_.getPlatforms();
         let conveyor = game_.getConveyor();
         let game = game_;
+        let slidingEffect = 0;
+        let slidingInc = 1;
         let leftRightState = 0;
         let animationTickTock = 0;
         
@@ -53,21 +56,22 @@ class Player {
     method void move() {
         var char key;
         let key = Keyboard.keyPressed();
+        
+        let leftRightState = 0;
+        
         if (key=130) {
             // left 
-            let x0 = Math.max(x0 - xInc, frameX0+1);
+            let x0 = x0 - xInc;
             let leftRightState = 1;
-            return;
         }
         if (key=132) {
             // right
-            let x0 = Math.min(x0 + xInc, frameX1-width);
+            let x0 = x0 + xInc;
             let leftRightState = 2;
-            return;
         }
         
-        let leftRightState = 0;
-        // TODO: left right blocking by another platform
+        let x0 = Math.min(Math.max(x0 + slidingEffect, frameX0+1), frameX1-width);
+        
         return;
     }
     
@@ -79,6 +83,7 @@ class Player {
     method void fall() {
         var int foot;
         var int p1, p2;
+        var int platformType;
         var Platform nextPlatform;
         var boolean cond1, cond2, cond3;
         let nextPlatform = platforms.get(whichPlatform);
@@ -97,7 +102,7 @@ class Player {
             let p2 = platforms.getP2();
             
             // roll back nextPlatform/whichPlatform
-            while ((nextPlatform.getY0() > foot) & (~(whichPlatform =p1))) {
+            while ((nextPlatform.getY0() > (foot-1)) & (~(whichPlatform =p1))) {
                 // go to the previous platform
                 // 1. (if index is at 0 ) set index to MaxSize
                 if (whichPlatform = 0) {
@@ -117,6 +122,7 @@ class Player {
             // detect if status changes
             if (~nextPlatform.support(x0, x0+width)) {
                 //start falling
+                let slidingEffect = 0;
                 let onPlatform = false;
                 let y0 = y0 + yInc;
                 // detect falling out of range
@@ -182,8 +188,17 @@ class Player {
                     // stand on platform
                     let onPlatform = true;
                     do nextPlatform.onStanding();
-                    if (nextPlatform.getType()=3) {
+                    let platformType = nextPlatform.getType();
+                    if (platformType=3) {
                         do startRising();
+                        return;
+                    }
+                    if (platformType=4) {
+                        let slidingEffect = -slidingInc;
+                        return;
+                    }
+                    if (platformType=5) {
+                        let slidingEffect = slidingInc;
                     }
                 } 
             }
