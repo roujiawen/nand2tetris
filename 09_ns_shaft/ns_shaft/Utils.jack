@@ -3,7 +3,7 @@ class Utils {
     field int prevRandInt;
     
     constructor Utils new(){
-        let prevRandInt = 5;
+        let prevRandInt = 1;
         return this;
     }
     

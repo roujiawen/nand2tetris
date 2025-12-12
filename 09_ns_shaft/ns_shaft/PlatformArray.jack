@@ -35,18 +35,8 @@ class PlatformArray {
         let coolOffPeriod = 80;
         let coolOffCount = 0;
         
-        let probType0 = 70; //%
-        let probType1 = 25; //%
-        let probType2 = 33; //%
-        let probType3 = 50; //%
-        let probType4 = 50; //%
-        
-        // let probType0 = 0; //%
-        // let probType1 = 0; //%
-        // let probType2 = 0; //%
-        // let probType3 = 0; //%
-        // let probType4 = 50; //%
-        
+        do gameLevel(1);
+
         let game = game_;
         
         return this;
@@ -172,6 +162,90 @@ class PlatformArray {
                 let i = 0;
             }
             let numOps = numOps - 1;
+        }
+        return;
+    }
+    
+    method void gameLevel(int level) {
+        
+        if (level=1) {
+        let probType0 = 70; //%
+        let probType1 = 0; //%
+        let probType2 = 100; //%
+        let probType3 = 0; //%
+        let probType4 = 0; //%
+        return;
+        }
+        
+        if (level=2) {
+        let probType0 = 70; //%
+        let probType1 = 70; //%
+        let probType2 = 100; //%
+        let probType3 = 0; //%
+        let probType4 = 0; //%
+        return;
+        }
+        
+        if (level=3) {
+        let probType0 = 60; //%
+        let probType1 = 20; //%
+        let probType2 = 25; //%
+        let probType3 = 100; //%
+        let probType4 = 0; //%
+        return;
+        }
+        
+        if (level=4) {
+        let probType0 = 40; //%
+        let probType1 = 10; //%
+        let probType2 = 11; //%
+        let probType3 = 13; //%
+        let probType4 = 50; //%
+        return;
+        }
+        
+        if (level=5) {
+        let probType0 = 70; //%
+        let probType1 = 20; //%
+        let probType2 = 50; //%
+        let probType3 = 100; //%
+        let probType4 = 0; //%
+        return;
+        }
+        
+        if (level=6) {
+        let probType0 = 60; //%
+        let probType1 = 20; //%
+        let probType2 = 50; //%
+        let probType3 = 50; //%
+        let probType4 = 50; //%
+        return;
+        }
+        
+        if (level=7) {
+        let probType0 = 40; //%
+        let probType1 = 25; //%
+        let probType2 = 33; //%
+        let probType3 = 50; //%
+        let probType4 = 50; //%
+        return;
+        }
+        
+        if (level=8) {
+        let probType0 = 50; //%
+        let probType1 = 30; //%
+        let probType2 = 33; //%
+        let probType3 = 50; //%
+        let probType4 = 50; //%
+        return;
+        }
+        
+        if (level>8) {
+        let probType0 = 40; //%
+        let probType1 = 25; //%
+        let probType2 = 33; //%
+        let probType3 = 50; //%
+        let probType4 = 50; //%
         }
         return;
     }

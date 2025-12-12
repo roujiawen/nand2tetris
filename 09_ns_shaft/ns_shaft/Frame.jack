@@ -46,7 +46,7 @@ class Frame {
         do Screen.drawLine(x0+width+5, y0-5, x0+width+5, y0+height); // static
         do Screen.drawLine(x0-6, y0-5, x0-6, y0+height); // static
         do Screen.drawLine(x0+width+6, y0-5, x0+width+6, y0+height); // static
-        let dx = 8;
+        let dx = 9;
         while (dx < (height)) {
             do Screen.drawPixel(x0-4, y0+dx);
             do Screen.drawPixel(x0+width+4, y0+dx);
@@ -67,6 +67,15 @@ class Frame {
             do Screen.drawPixel(x0+width+1, y0+dx);
             let dx = dx+15;
         }
+        
+        do Screen.drawPixel(x0-4, 0);
+        do Screen.drawPixel(x0+width+4, 0);
+        do Screen.drawPixel(x0-3, 0);
+        do Screen.drawPixel(x0+width+3, 0);
+        do Screen.drawPixel(x0-2, 0);
+        do Screen.drawPixel(x0+width+2, 0);
+        do Screen.drawPixel(x0-1, 0);
+        do Screen.drawPixel(x0+width+1, 0);
         
         // teeth
         do Screen.setColor(false);

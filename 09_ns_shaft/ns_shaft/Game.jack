@@ -6,11 +6,13 @@ class Game {
     field Conveyor conveyor;
     field int score, scoreStep;
     field boolean gameOver;
+    field int prob;
     
     constructor Game new(){
         let score = 0;
         let scoreStep = 1;
         let gameOver = false;
+        do gameLevel(1);
         return this;
     }
         
@@ -28,7 +30,7 @@ class Game {
         do player.moveUp();
         
         do platforms.moveUp();
-        do platforms.addNewBottom(50);
+        do platforms.addNewBottom(prob);
         
         
         
@@ -79,6 +81,10 @@ class Game {
     
     method void incScore() {
         let score = score + scoreStep;
+        if (Utils.mod(score, 25)=0) {
+            do gameLevel((score/25)+1);
+            do platforms.gameLevel((score/25)+1);
+        }
         return;
     }
     
@@ -87,6 +93,53 @@ class Game {
     }
     method void setGameOver(boolean b) {
         let gameOver = b;
+        return;
+    }
+    
+    method void gameLevel(int level) {
+        if (level=1) {
+            let prob = 50;
+            return;
+        }
+        
+        if (level=2) {
+            let prob = 10;
+            return;
+        }
+        
+        if (level=3) {
+            let prob = 10;
+            return;
+        }
+        
+        if (level=4) {
+            let prob = 40;
+            return;
+        }
+        
+        if (level=5) {
+            let prob = 30;
+            return;
+        }
+        
+        if (level=6) {
+            let prob = 10;
+            return;
+        }
+        
+        if (level=7) {
+            let prob = 30;
+            return;
+        }
+        
+        if (level=8) {
+            let prob = 10;
+            return;
+        }
+        
+        if (level>8) {
+            let prob = 20;
+        }
         return;
     }
 

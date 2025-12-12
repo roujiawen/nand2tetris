@@ -36,8 +36,12 @@ class Main {
         while (true) {
             if (game.getGameOver()) {
             
-                do Output.moveCursor(3, 2);
-                do Output.printString("GAME OVER!");
+                do Output.moveCursor(9, 26);
+                do Output.printString("             ");
+                do Output.moveCursor(10, 26);
+                do Output.printString("  GAME OVER  ");
+                do Output.moveCursor(11, 26);
+                do Output.printString("             ");
                 do Sys.wait(4000);
                 do game.setGameOver(false);
                 
@@ -66,7 +70,7 @@ class Main {
                 
             } else {
                 do game.advance();
-                do Sys.wait(10);
+                do Sys.wait(1);
             }
         }
         
