@@ -1,10 +1,12 @@
 
 from pathlib import Path
+from base import NonTerminalSyntax
+from expressions import Expression, SubroutineCall
 from terminals import Keyword, Symbol
 from tokenizer import Tokenizer
 from utils import rf_process
 
-from intermediates import ClassName, Expression, NonTerminalSyntax, Optional, OptionalOrMore, OneOf, Serial, SubroutineCall, SubroutineName, Type_, VarName
+from intermediates import ClassName, Optional, OptionalOrMore, OneOf, Serial, SubroutineName, Type_, VarName
 
 
 
@@ -227,7 +229,6 @@ class ReturnStatement(NonTerminalSyntax):
         ]
 
 
-        
 class CompilationEngine:
     def __init__(self, tokenizer: Tokenizer, out_path: Path):
         self.out_path = out_path

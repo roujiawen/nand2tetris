@@ -1,118 +1,9 @@
 from tokenizer import Token, Tokenizer
 from typing import override
-from terminals import Identifier, IntegerConstant, Keyword, StringConstant, Symbol
-from nodes import Node, NonTerminalNode, NonTerminalType, TerminalNode
-from utils import JackSyntaxError
+from terminals import Identifier, Keyword, Symbol
+from nodes import Node, TerminalNode
+from base import JackSyntaxError
 
-
-class NonTerminalSyntax:
-    def __init__(self):
-        self.type : NonTerminalType
-        self.syntax : list = []
-    
-    def __str__(self):
-        return f"{self.type}()"
-        
-    def _instantiate_syntax(self):
-        pass
-        
-    def resolve(self, tokenizer) -> list[Node]:
-        print("Resolving", self)
-        if not self.syntax:
-            self._instantiate_syntax()
-        node = NonTerminalNode(self.type, [])
-        for ele in self.syntax:
-            node.add_children(ele.resolve(tokenizer))
-        return [node]
-    
-    def match(self, t):
-        if not self.syntax:
-            self._instantiate_syntax()
-        if self.syntax[0].match(t):
-            print(self, "matched!")
-            return True
-        return False
-        
-class Expression(NonTerminalSyntax):
-    """
-    term (op term)*
-    """
-    def __init__(self):
-        super().__init__()
-        self.type = "expression"
-        
-    def _instantiate_syntax(self):
-        # self.syntax = [
-        #     Term(),
-        #     OptionalOrMore([Operator(), Term()])
-        # ]
-        self.syntax = [
-            Term()
-        ]
-        # self.syntax = [
-        #     OneOf([
-        #         Identifier(),
-        #         ClassName(),
-        #         SubroutineName(),
-        #         VarName(),
-        #         KeywordConstant(),
-        #     ])
-            
-        # ]
-
-class ExpressionList(NonTerminalSyntax):
-    """
-    (expression (',' expression)* )?
-    """
-    def __init__(self):
-        super().__init__()
-        self.type = "expressionList"
-    
-    def _instantiate_syntax(self):  
-        self.syntax = [
-            Optional([
-                Expression(),
-                OptionalOrMore([
-                    Symbol(","),
-                    Expression()
-                ])
-            ])
-        ]
-
-class Term(NonTerminalSyntax):
-    """
-    integerConstant | stringConstant | keywordConstant | varName | varName '[' expression
-    ']' | subroutineCall | '(' expression ')' | unaryOp term
-    """
-    def __init__(self):
-        super().__init__()
-        self.type = "term"
-        
-    def _instantiate_syntax(self):
-        self.syntax = [
-            OneOf([
-                IntegerConstant(),
-                StringConstant(),
-                KeywordConstant(),
-                VarName(),
-                Serial([
-                    VarName(), 
-                    Symbol("["),
-                    Expression(),
-                    Symbol("]"),
-                ]),
-                SubroutineCall(),
-                Serial([
-                    Symbol("("),
-                    Expression(),
-                    Symbol(")"),
-                ]),
-                Serial([
-                    UnaryOperator(),
-                    Term()
-                ]),
-            ])
-        ]
 
 class Optional:
     def __init__(self, seq : list):
@@ -197,42 +88,7 @@ class OneOf:
         error_message = f"Must be one of the following: {options_text}. Instead found {first_token}."
         raise JackSyntaxError(tokenizer, error_message)    
         
-class SubroutineCall(OneOf):
-    """
-    subroutineName '(' expressionList ')' | ( className | varName) '.' subroutineName '('
-    expressionList ')'
-    """
-    def __init__(self):
-        options = [
-            Serial([
-                SubroutineName(),
-                Symbol("("),
-                ExpressionList(),
-                Symbol(")"),
-            ]),
-            Serial([
-                OneOf([ClassName(), VarName()]),
-                Symbol("."),
-                SubroutineName(),
-                Symbol("("),
-                ExpressionList(),
-                Symbol(")"),
-            ])
-        ]
-        super().__init__(options)
-        self.type = "subroutineCall"
-    
-    @override
-    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
-        print("Resolving", "subroutineCall()")
-        second_token = tokenizer.peek(index=1)
-        if Symbol(".").match(second_token):
-            option = self.options[1]
-        else:
-            option = self.options[0]
-        
-        result = option.resolve(tokenizer)
-        return result
+
 
 class Type_(OneOf):
     """
@@ -318,10 +174,7 @@ class ClassName(Identifier):
     
     @override
     def resolve(self, tokenizer) -> list[Node]:
-        # print("Class Names:", ClassName.VALID_CLASS_NAMES)
         t = tokenizer.next()
-        self._validate_type(t, tokenizer.line_count)
-        name_not_valid = t.name not in ClassName.VALID_CLASS_NAMES
-        if name_not_valid:
+        if not self.match(t):
             raise JackSyntaxError(tokenizer, "Expected valid class name")
         return [TerminalNode.from_token(t)]

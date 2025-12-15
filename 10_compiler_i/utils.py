@@ -2,14 +2,6 @@ from builtins import IOError
 from argparse import ArgumentParser
 from pathlib import Path
 
-class JackSyntaxError(Exception):
-    def __init__(self, tokenizer, message, *args: object) -> None:
-        message = f"{tokenizer.filename} Line {tokenizer.line_count}: {message}"
-        super().__init__(message, *args)
-
-class TokenizerError(Exception):
-    pass
-
 
 def rf_process(call_function, ext):
     """Apply call_function to arg.source which is either a file with given ext or a folder with such files"""

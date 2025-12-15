@@ -3,9 +3,12 @@ from collections import deque
 import string
 from typing import Iterator, Literal
 
-from utils import rf_process, TokenizerError
+from utils import rf_process
 
 LexicalType = Literal["keyword", "symbol", "integerConstant", "stringConstant", "identifier"]
+
+class TokenizerError(Exception):
+    pass
 
 class Token:
     def __init__(self, type_, name):
