@@ -1,3 +1,7 @@
 09_ns_shaft/ns_shaft/*.vm
 **/test.vm
+**/test.jack
 .zed
+__pycache__/
+projects.zip
+projects/
