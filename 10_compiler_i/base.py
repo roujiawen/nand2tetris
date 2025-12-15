@@ -1,4 +1,5 @@
-from typing import Callable
+from abc import ABC, abstractmethod
+from typing import ClassVar, Literal
 from nodes import Node, NonTerminalNode, NonTerminalType, TerminalNode, TerminalType
 from tokenizer import Token, Tokenizer
 
@@ -6,46 +7,66 @@ class JackSyntaxError(Exception):
     def __init__(self, tokenizer, message, *args: object) -> None:
         message = f"{tokenizer.filename} Line {tokenizer.line_count}: {message}"
         super().__init__(message, *args)
-
-class TerminalSyntax:
-    def __init__(self) -> None:
-        self.expected_type : TerminalType
-        self.expected_name : str | None = None
-        self.match : Callable
+        
+class Syntax(ABC):
+    @property
+    @abstractmethod
+    def type(self) -> TerminalType | NonTerminalType | str:
+        pass
+    
+    @abstractmethod  
+    def match(self, t : Token) -> bool:
+        pass
+        
+    @abstractmethod
+    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
+        pass
+        
+class HelperSyntax(Syntax, ABC):
+    TYPE: ClassVar[str]
     
     @property
-    def type(self):
-        return self.expected_type
+    def type(self) -> str:
+        return self.TYPE
+
+class TerminalSyntax(Syntax, ABC):
+    
+    # Class variable to select implementation
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]]
+    TYPE: ClassVar[TerminalType]
+    
+    @property
+    def type(self) -> TerminalType:
+        return self.TYPE
         
     def __str__(self):
-        return f"{self.expected_type}({self.expected_name})"
+        if hasattr(self, "name"):
+            return f"{self.type}({getattr(self, "name")})"
+        else:
+            return f"{self.type}()"
         
     def _create_syntax_error(self, t : Token, tokenizer : Tokenizer) -> JackSyntaxError:
-        if self.expected_name:
-            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.expected_type} `{self.expected_name}`, got {t.type} `{t.name}`"
+        if hasattr(self, "name"):
+            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.type} `{getattr(self, "name")}`, got {t.type} `{t.name}`"
         else:
-            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.expected_type}, got {t.type} `{t.name}`"
+            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.type}, got {t.type} `{t.name}`"
         return JackSyntaxError(tokenizer, error_message)
-        
-    # def _validate_type(self, t, line_num):
-    #     type_mismatched = (self.expected_type != t.type)
-    #     if type_mismatched:
-    #         raise self._create_syntax_error(t, line_num)
             
-    # def _validate_name(self, t, line_num):
-    #     name_mismatched = (self.expected_name != t.name)
-    #     if name_mismatched:
-    #         raise self._create_syntax_error(t, line_num)
-            
-    def _match_type_and_name(self, t):
-        if (self.expected_type == t.type) and (self.expected_name == t.name):
+    def _match_type_and_name(self, t) -> bool:
+        if (self.type == t.type) and (getattr(self, "name") == t.name):
             return True
         return False
     
-    def _match_type(self, t):
-        if (self.expected_type == t.type):
+    def _match_type(self, t) -> bool:
+        if (self.type == t.type):
             return True
         return False
+        
+    def match(self, t) -> bool:
+        if self.MATCH_MODE == "exact_match":
+            return self._match_type_and_name(t)
+        else:
+            return self._match_type(t)
     
     def resolve(self, tokenizer) -> list[Node]:
         t = tokenizer.next()
@@ -54,30 +75,42 @@ class TerminalSyntax:
         print("Resolved", self, "==", t)
         return [TerminalNode.from_token(t)]
 
-class NonTerminalSyntax:
-    def __init__(self):
-        self.type : NonTerminalType
-        self.syntax : list = []
+class NonTerminalSyntax(Syntax, ABC):
+    # Define as class variable, computed once per class
+    _syntax_cache: ClassVar[list[Syntax] | None] = None
+    TYPE : ClassVar[NonTerminalType]
     
+    @property
+    def type(self) -> NonTerminalType:
+        return self.TYPE
+     
+    @property
+    def syntax(self) -> list[Syntax]:
+        """Get syntax, caching at class level"""
+        if self.__class__._syntax_cache is None:
+            self.__class__._syntax_cache = self.__class__._make_syntax()
+        return self.__class__._syntax_cache
+    
+    @classmethod
+    @abstractmethod
+    def _make_syntax(cls) -> list[Syntax]:
+        """Factory method for syntax"""
+        pass
+        
     def __str__(self):
         return f"{self.type}()"
         
-    def _instantiate_syntax(self):
-        pass
+    def match(self, t : Token) -> bool:
+        if self.syntax[0].match(t):
+            print(self, "matched!")
+            return True
+        return False
         
-    def resolve(self, tokenizer) -> list[Node]:
+    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         print("Resolving", self)
-        if not self.syntax:
-            self._instantiate_syntax()
         node = NonTerminalNode(self.type, [])
         for ele in self.syntax:
             node.add_children(ele.resolve(tokenizer))
         return [node]
     
-    def match(self, t):
-        if not self.syntax:
-            self._instantiate_syntax()
-        if self.syntax[0].match(t):
-            print(self, "matched!")
-            return True
-        return False
+    

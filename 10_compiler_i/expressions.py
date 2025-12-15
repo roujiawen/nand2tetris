@@ -1,9 +1,9 @@
 
         
-from typing import override
-from base import NonTerminalSyntax
+from typing import ClassVar, override
+from base import NonTerminalSyntax, Syntax
 from intermediates import ClassName, KeywordConstant, OneOf, Optional, OptionalOrMore, Serial, SubroutineName, UnaryOperator, VarName
-from nodes import Node
+from nodes import Node, NonTerminalType
 from terminals import IntegerConstant, StringConstant, Symbol
 from tokenizer import Tokenizer
 
@@ -12,18 +12,20 @@ class Expression(NonTerminalSyntax):
     """
     term (op term)*
     """
+    
+    TYPE: ClassVar[NonTerminalType] = "expression"
     def __init__(self):
         super().__init__()
-        self.type = "expression"
         
-    def _instantiate_syntax(self):
+    @classmethod
+    def _make_syntax(cls) -> list[Syntax]:
+        return [
+            Term()
+        ]
         # self.syntax = [
         #     Term(),
         #     OptionalOrMore([Operator(), Term()])
         # ]
-        self.syntax = [
-            Term()
-        ]
         # self.syntax = [
         #     OneOf([
         #         Identifier(),
@@ -39,12 +41,15 @@ class ExpressionList(NonTerminalSyntax):
     """
     (expression (',' expression)* )?
     """
+    
+    TYPE: ClassVar[NonTerminalType] = "expressionList"
+    
     def __init__(self):
         super().__init__()
-        self.type = "expressionList"
     
-    def _instantiate_syntax(self):  
-        self.syntax = [
+    @classmethod
+    def _make_syntax(cls) -> list[Syntax]:
+        return [
             Optional([
                 Expression(),
                 OptionalOrMore([
@@ -59,12 +64,15 @@ class Term(NonTerminalSyntax):
     integerConstant | stringConstant | keywordConstant | varName | varName '[' expression
     ']' | subroutineCall | '(' expression ')' | unaryOp term
     """
+    
+    TYPE: ClassVar[NonTerminalType] = "term"
+    
     def __init__(self):
         super().__init__()
-        self.type = "term"
         
-    def _instantiate_syntax(self):
-        self.syntax = [
+    @classmethod
+    def _make_syntax(cls) -> list[Syntax]:
+        return [
             OneOf([
                 IntegerConstant(),
                 StringConstant(),
@@ -94,6 +102,9 @@ class SubroutineCall(OneOf):
     subroutineName '(' expressionList ')' | ( className | varName) '.' subroutineName '('
     expressionList ')'
     """
+    
+    TYPE: ClassVar[str] = "subroutineCall"
+    
     def __init__(self):
         options = [
             Serial([
@@ -112,7 +123,6 @@ class SubroutineCall(OneOf):
             ])
         ]
         super().__init__(options)
-        self.type = "subroutineCall"
     
     @override
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:

@@ -9,6 +9,9 @@ LexicalType = Literal["keyword", "symbol", "integerConstant", "stringConstant", 
 
 class TokenizerError(Exception):
     pass
+    
+class NoMoreTokens(Exception):
+    pass
 
 class Token:
     def __init__(self, type_, name):
@@ -74,18 +77,16 @@ class Tokenizer:
                 
             return [Token("identifier", token)]
     
-    def peek(self, index=0) -> Token | None:
+    def peek(self, index=0) -> Token:
         size = len(self.buffered_tokens)
         while size <= index:
             token = self.next()
-            if token is None:
-                return None
             self.buffered_tokens.appendleft(token)
             size = len(self.buffered_tokens)
         print(f"peeked {index}-th token:", self.buffered_tokens[index])
         return self.buffered_tokens[index]
     
-    def next(self) -> Token | None:
+    def next(self) -> Token:
         # Return already parsed buffered token
         if self.buffered_tokens:
             token = self.buffered_tokens.popleft()
@@ -97,7 +98,7 @@ class Tokenizer:
                 self.buffered_tokens += tokens[1:]
                 return tokens[0]
         
-        return None
+        raise NoMoreTokens()
     
     def tokens(self) -> Iterator[Token]:
         while True:

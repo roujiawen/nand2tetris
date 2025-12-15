@@ -1,15 +1,19 @@
 from tokenizer import Token, Tokenizer
-from typing import override
+from typing import ClassVar, override
 from terminals import Identifier, Keyword, Symbol
 from nodes import Node, TerminalNode
-from base import JackSyntaxError
+from base import HelperSyntax, JackSyntaxError, Syntax
 
 
-class Optional:
-    def __init__(self, seq : list):
-        self.seq = seq
+class Optional(HelperSyntax):
     
-    def resolve(self, tokenizer) -> list[Node]:
+    TYPE: ClassVar[str] = "optional"
+    
+    def __init__(self, seq : list[Syntax]):
+        super().__init__()
+        self.seq : list[Syntax] = seq
+    
+    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         result = []
         first_token = tokenizer.peek()
         print("Optional: peeking", first_token)
@@ -24,11 +28,15 @@ class Optional:
             return True
         return False
 
-class OptionalOrMore:
-    def __init__(self, seq : list):
-        self.seq = seq
+class OptionalOrMore(HelperSyntax):
     
-    def resolve(self, tokenizer) -> list[Node]:
+    TYPE: ClassVar[str] = "optionalOrMore"
+    
+    def __init__(self, seq : list):
+        super().__init__()
+        self.seq : list[Syntax] = seq
+    
+    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         result = []
         match_found = True
         while match_found:
@@ -46,10 +54,13 @@ class OptionalOrMore:
             return True
         return False
 
-class Serial:
+class Serial(HelperSyntax):
+    
+    TYPE: ClassVar[str] = "Serial" #TODO: not right
+    
     def __init__(self, seq : list):
-        self.seq = seq
-        self.type = "Serial" #TODO: not right
+        super().__init__()
+        self.seq : list[Syntax] = seq
     
     def resolve(self, tokenizer) -> list[Node]:
         result = []
@@ -62,12 +73,15 @@ class Serial:
             return True
         return False
 
-class OneOf:
+class OneOf(HelperSyntax):
+    
+    TYPE: ClassVar[str] = "oneOf"
+    
     def __init__(self, options : list):
         super().__init__()
-        self.options = options
+        self.options : list[Syntax] = options
         
-    def match(self, t) -> bool:
+    def match(self, t : Token) -> bool:
         if any(o.match(t) for o in self.options):
             print("OneOf() matched!")
             return True
@@ -94,26 +108,33 @@ class Type_(OneOf):
     """
     'int' | 'char' | 'boolean' | className
     """
+    
+    TYPE: ClassVar[str] = "type"
+    
     def __init__(self):
-        options = [Keyword("int"), Keyword("char"), Keyword("boolean"), ClassName()]
+        options : list[Syntax] = [Keyword("int"), Keyword("char"), Keyword("boolean"), ClassName()]
         super().__init__(options)
-        self.type = "type"
         
 class KeywordConstant(OneOf):
     """
     'true' | 'false' | 'null' | 'this'
     """
+    
+    TYPE: ClassVar[str] = "keywordConstant"
+    
     def __init__(self):
-        options = [Keyword("true"), Keyword("false"), Keyword("null"), Keyword("this")]
+        options : list[Syntax] = [Keyword("true"), Keyword("false"), Keyword("null"), Keyword("this")]
         super().__init__(options)
-        self.type = "keywordConstant"
         
 class Operator(OneOf):
     """
     '+' | '-' | '*' | '/' | '&' | '|' | '<' | '>' | '='
     """
+    
+    TYPE: ClassVar[str] = "op"
+    
     def __init__(self):
-        options = [
+        options : list[Syntax] = [
             Symbol("+"), 
             Symbol("-"), 
             Symbol("*"), 
@@ -125,19 +146,20 @@ class Operator(OneOf):
             Symbol("=")
         ]
         super().__init__(options)
-        self.type = "op"
 
 class UnaryOperator(OneOf):
     """
     '-' | '~'
     """
+    
+    TYPE: ClassVar[str] = "unaryOp"
+    
     def __init__(self):
-        options = [
+        options : list[Syntax] = [
             Symbol("-"),
             Symbol("~")
         ]
         super().__init__(options)
-        self.type = "unaryOp"
 
 class VarName(Identifier):
     """
@@ -153,27 +175,26 @@ class SubroutineName(Identifier):
     def __init__(self):
         super().__init__()
 
-
 class ClassName(Identifier):
     """
     Identifier
     """
-    VALID_CLASS_NAMES = {"Math", "String", "Array", "Output", "Screen", "Keyboard", "Memory", "Sys"}
+    _class_name_registry = {"Math", "String", "Array", "Output", "Screen", "Keyboard", "Memory", "Sys"}
     def __init__(self):
         super().__init__()
         
     @classmethod
     def add(cls, new_name):
-        cls.VALID_CLASS_NAMES.add(new_name)
+        cls._class_name_registry.add(new_name)
         
     @override
-    def match(self, t):
-        if (self.expected_type == t.type) and (t.name in ClassName.VALID_CLASS_NAMES):
+    def match(self, t : Token) -> bool:
+        if (self.type == t.type) and (t.name in ClassName._class_name_registry):
             return True
         return False
     
     @override
-    def resolve(self, tokenizer) -> list[Node]:
+    def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         t = tokenizer.next()
         if not self.match(t):
             raise JackSyntaxError(tokenizer, "Expected valid class name")

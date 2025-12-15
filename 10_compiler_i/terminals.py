@@ -1,37 +1,48 @@
+from typing import ClassVar, Literal
 from base import TerminalSyntax
 from tokenizer import Tokenizer
 from nodes import TerminalType
 
 class Keyword(TerminalSyntax):
-    def __init__(self, expected_name):
+    
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]] = "exact_match"
+    TYPE: ClassVar[TerminalType] = "keyword"
+    
+    def __init__(self, name : str):
         super().__init__()
-        self.expected_type : TerminalType = "keyword"
-        self.expected_name : str | None = expected_name
-        self.match = self._match_type_and_name
-        assert expected_name in Tokenizer.KEYWORDS
+        self.name : str = name
+        assert name in Tokenizer.KEYWORDS
 
 class Symbol(TerminalSyntax):
-    def __init__(self, expected_name : str):
+    
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]] = "exact_match"
+    TYPE: ClassVar[TerminalType] = "symbol"
+    
+    def __init__(self, name : str):
         super().__init__()
-        self.expected_type : TerminalType = "symbol"
-        self.expected_name : str | None = expected_name
-        self.match = self._match_type_and_name
-        assert expected_name in Tokenizer.SYMBOLS
+        self.name : str = name
+        assert name in Tokenizer.SYMBOLS
 
 class Identifier(TerminalSyntax):
+    
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]] = "type_match"
+    TYPE: ClassVar[TerminalType] = "identifier" #TODO: how to make this unchanged for subclass?
+    
     def __init__(self):
         super().__init__()
-        self.expected_type : TerminalType = "identifier"
-        self.match = self._match_type
     
 class IntegerConstant(TerminalSyntax):
+    
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]] = "type_match"
+    TYPE: ClassVar[TerminalType] = "integerConstant"
+    
     def __init__(self):
         super().__init__()
-        self.expected_type : TerminalType = "integerConstant"
-        self.match = self._match_type
 
 class StringConstant(TerminalSyntax):
+    
+    MATCH_MODE: ClassVar[Literal["exact_match", "type_match"]] = "type_match"
+    TYPE: ClassVar[TerminalType] = "stringConstant"
+    
     def __init__(self):
         super().__init__()
-        self.expected_type : TerminalType = "stringConstant"
-        self.match = self._match_type
