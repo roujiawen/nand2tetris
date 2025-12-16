@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-import functools
-from typing import Callable, ClassVar, Literal
+from typing import ClassVar, Literal
 from nodes import Node, NonTerminalNode, NonTerminalType, TerminalNode, TerminalType
 from tokenizer import Tokenizer
 from utils import log_match, log_resolve

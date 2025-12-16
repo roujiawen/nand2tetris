@@ -1,4 +1,5 @@
 
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import ClassVar
 from base import JackSyntaxError, NonTerminalSyntax, Syntax
@@ -6,7 +7,7 @@ from expressions import Expression, SubroutineCall
 from nodes import NonTerminalType
 from terminals import Keyword, Symbol
 from tokenizer import NoMoreTokens, Tokenizer
-from utils import rf_process
+from utils import configure_debug_logging, rf_process
 
 from intermediates import ClassName, Optional, OptionalOrMore, OneOf, Serial, SubroutineName, Type_, VarName
 
@@ -297,7 +298,7 @@ class ReturnStatement(NonTerminalSyntax):
 #         } </{type_}>")
             
 
-def collect_class_names(source_path : Path):
+def register_class_names(source_path : Path):
     ClassName.add(source_path.stem)
             
 def generate_compiled_xml(source_path):
@@ -312,6 +313,13 @@ def generate_compiled_xml(source_path):
             root_node.write(out_file)
     
 if __name__ == "__main__":
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("source")
+    arg_parser.add_argument("--debug", action="store_true", help="Enable debug logging to compiler_debug.log")
+    arg = arg_parser.parse_args()
+    configure_debug_logging(arg.debug)
+    source = arg.source    
+
+    rf_process(register_class_names, source, "jack")
     # apply generate_tokenized_xml to given .jack file or all .jack files in given directory
-    rf_process(collect_class_names, "jack")
-    rf_process(generate_compiled_xml, "jack")
+    rf_process(generate_compiled_xml, source, "jack")

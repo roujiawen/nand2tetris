@@ -1,9 +1,10 @@
 
+from argparse import ArgumentParser
 from collections import deque
 import string
 from typing import Iterator, Literal
 
-from utils import rf_process
+from utils import logger, rf_process
 
 LexicalType = Literal["keyword", "symbol", "integerConstant", "stringConstant", "identifier"]
 
@@ -102,10 +103,9 @@ class Tokenizer:
     
     def tokens(self) -> Iterator[Token]:
         while True:
-            token_or_none = self.next()
-            if token_or_none:
-                yield token_or_none
-            else:
+            try:
+                yield self.next()
+            except NoMoreTokens:
                 break
         
     def _next_char(self) -> list[Token]:
@@ -122,7 +122,11 @@ class Tokenizer:
         # Read next line if previous line is finished
         if self.p == len(self.buffer):
             self.line_count += 1
-            print(f"########## Parsing Line {self.line_count} in {self.filename}... ##########")
+            logger.debug(
+                "### Parsing Line %s in %s... ###",
+                self.line_count,
+                self.filename,
+            )
             self.buffer = self.source_file.readline()
             if not self.buffer:
                 self.eof = True
@@ -203,7 +207,11 @@ def generate_tokenized_xml(source_path):
             out_file.write("</tokens>\n")
 
 if __name__ == "__main__":
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("source")
+    arg = arg_parser.parse_args()
+    source = arg.source    
     # apply generate_tokenized_xml to given .jack file or all .jack files in given directory
-    rf_process(generate_tokenized_xml, "jack")
+    rf_process(generate_tokenized_xml, source, "jack")
        
                 
