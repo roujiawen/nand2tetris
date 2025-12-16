@@ -2,10 +2,11 @@
         
 from typing import ClassVar, override
 from base import NonTerminalSyntax, Syntax
-from intermediates import ClassName, KeywordConstant, OneOf, Optional, OptionalOrMore, Serial, SubroutineName, UnaryOperator, VarName
+from intermediates import ClassName, KeywordConstant, OneOf, Operator, Optional, OptionalOrMore, Serial, SubroutineName, UnaryOperator, VarName
 from nodes import Node, NonTerminalType
 from terminals import IntegerConstant, StringConstant, Symbol
 from tokenizer import Tokenizer
+from utils import log_resolve
 
 
 class Expression(NonTerminalSyntax):
@@ -19,23 +20,10 @@ class Expression(NonTerminalSyntax):
         
     @classmethod
     def _make_syntax(cls) -> list[Syntax]:
-        return [
-            Term()
+        return  [
+            Term(),
+            OptionalOrMore([Operator(), Term()])
         ]
-        # self.syntax = [
-        #     Term(),
-        #     OptionalOrMore([Operator(), Term()])
-        # ]
-        # self.syntax = [
-        #     OneOf([
-        #         Identifier(),
-        #         ClassName(),
-        #         SubroutineName(),
-        #         VarName(),
-        #         KeywordConstant(),
-        #     ])
-            
-        # ]
 
 class ExpressionList(NonTerminalSyntax):
     """
@@ -77,14 +65,6 @@ class Term(NonTerminalSyntax):
                 IntegerConstant(),
                 StringConstant(),
                 KeywordConstant(),
-                VarName(),
-                Serial([
-                    VarName(), 
-                    Symbol("["),
-                    Expression(),
-                    Symbol("]"),
-                ]),
-                SubroutineCall(),
                 Serial([
                     Symbol("("),
                     Expression(),
@@ -94,6 +74,14 @@ class Term(NonTerminalSyntax):
                     UnaryOperator(),
                     Term()
                 ]),
+                SubroutineCall(),
+                Serial([
+                    VarName(), 
+                    Symbol("["),
+                    Expression(),
+                    Symbol("]"),
+                ], look_ahead=1),
+                VarName()
             ])
         ]
 
@@ -112,7 +100,7 @@ class SubroutineCall(OneOf):
                 Symbol("("),
                 ExpressionList(),
                 Symbol(")"),
-            ]),
+            ], look_ahead=1),
             Serial([
                 OneOf([ClassName(), VarName()]),
                 Symbol("."),
@@ -120,19 +108,17 @@ class SubroutineCall(OneOf):
                 Symbol("("),
                 ExpressionList(),
                 Symbol(")"),
-            ])
+            ], look_ahead=1)
         ]
         super().__init__(options)
     
+    @log_resolve
     @override
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
-        print("Resolving", "subroutineCall()")
-        second_token = tokenizer.peek(index=1)
-        if Symbol(".").match(second_token):
+        if Symbol(".").match(tokenizer, index=1):
             option = self.options[1]
         else:
             option = self.options[0]
-        
         result = option.resolve(tokenizer)
         return result
         

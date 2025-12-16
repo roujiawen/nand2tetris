@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import ClassVar, Literal
+import functools
+from typing import Callable, ClassVar, Literal
 from nodes import Node, NonTerminalNode, NonTerminalType, TerminalNode, TerminalType
-from tokenizer import Token, Tokenizer
+from tokenizer import Tokenizer
+from utils import log_match, log_resolve
+
+
 
 class JackSyntaxError(Exception):
     def __init__(self, tokenizer, message, *args: object) -> None:
@@ -15,12 +19,14 @@ class Syntax(ABC):
         pass
     
     @abstractmethod  
-    def match(self, t : Token) -> bool:
+    def match(self, tokenizer : Tokenizer, index : int = 0) -> bool:
         pass
         
     @abstractmethod
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         pass
+    
+
         
 class HelperSyntax(Syntax, ABC):
     TYPE: ClassVar[str]
@@ -28,6 +34,9 @@ class HelperSyntax(Syntax, ABC):
     @property
     def type(self) -> str:
         return self.TYPE
+    
+    def __str__(self):
+        return f"{self.type}()"
 
 class TerminalSyntax(Syntax, ABC):
     
@@ -41,38 +50,42 @@ class TerminalSyntax(Syntax, ABC):
         
     def __str__(self):
         if hasattr(self, "name"):
-            return f"{self.type}({getattr(self, "name")})"
+            return f"{self.type}(`{getattr(self, "name")}`)"
         else:
             return f"{self.type}()"
         
-    def _create_syntax_error(self, t : Token, tokenizer : Tokenizer) -> JackSyntaxError:
+    def _create_syntax_error(self, tokenizer : Tokenizer) -> JackSyntaxError:
+        t = tokenizer.peek()
         if hasattr(self, "name"):
-            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.type} `{getattr(self, "name")}`, got {t.type} `{t.name}`"
+            error_message = f"Expected {self.type} `{getattr(self, "name")}`, got {t.type} `{t.name}`"
         else:
-            error_message = f"{tokenizer.filename} Line {tokenizer.line_count}: Expected {self.type}, got {t.type} `{t.name}`"
+            error_message = f"Expected {self.type}, got {t.type} `{t.name}`"
         return JackSyntaxError(tokenizer, error_message)
             
-    def _match_type_and_name(self, t) -> bool:
+    def _match_type_and_name(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        t = tokenizer.peek(index=index)
         if (self.type == t.type) and (getattr(self, "name") == t.name):
             return True
         return False
     
-    def _match_type(self, t) -> bool:
+    def _match_type(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        t = tokenizer.peek(index=index)
         if (self.type == t.type):
             return True
         return False
-        
-    def match(self, t) -> bool:
-        if self.MATCH_MODE == "exact_match":
-            return self._match_type_and_name(t)
-        else:
-            return self._match_type(t)
     
-    def resolve(self, tokenizer) -> list[Node]:
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        if self.MATCH_MODE == "exact_match":
+            return self._match_type_and_name(tokenizer, index=index)
+        else:
+            return self._match_type(tokenizer, index=index)
+    
+    @log_resolve
+    def resolve(self, tokenizer: Tokenizer) -> list[Node]:
+        if not self.match(tokenizer):
+            raise self._create_syntax_error(tokenizer)
         t = tokenizer.next()
-        if not self.match(t):
-            raise self._create_syntax_error(t, tokenizer)
-        print("Resolved", self, "==", t)
         return [TerminalNode.from_token(t)]
 
 class NonTerminalSyntax(Syntax, ABC):
@@ -99,15 +112,15 @@ class NonTerminalSyntax(Syntax, ABC):
         
     def __str__(self):
         return f"{self.type}()"
-        
-    def match(self, t : Token) -> bool:
-        if self.syntax[0].match(t):
-            print(self, "matched!")
+    
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        if self.syntax[0].match(tokenizer, index=index):
             return True
         return False
-        
+    
+    @log_resolve  
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
-        print("Resolving", self)
         node = NonTerminalNode(self.type, [])
         for ele in self.syntax:
             node.add_children(ele.resolve(tokenizer))

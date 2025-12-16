@@ -1,8 +1,9 @@
-from tokenizer import Token, Tokenizer
+from tokenizer import Tokenizer
 from typing import ClassVar, override
 from terminals import Identifier, Keyword, Symbol
 from nodes import Node, TerminalNode
 from base import HelperSyntax, JackSyntaxError, Syntax
+from utils import log_match, log_resolve
 
 
 class Optional(HelperSyntax):
@@ -12,19 +13,18 @@ class Optional(HelperSyntax):
     def __init__(self, seq : list[Syntax]):
         super().__init__()
         self.seq : list[Syntax] = seq
-    
+        
+    @log_resolve
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         result = []
-        first_token = tokenizer.peek()
-        print("Optional: peeking", first_token)
-        if self.seq[0].match(first_token):
-            print("Matched", self.seq[0])
+        if self.seq[0].match(tokenizer):
             for ele in self.seq:
                 result += ele.resolve(tokenizer)
         return result
     
-    def match(self, t: Token) -> bool:
-        if self.seq[0].match(t):
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        if self.seq[0].match(tokenizer, index=index):
             return True
         return False
 
@@ -36,12 +36,12 @@ class OptionalOrMore(HelperSyntax):
         super().__init__()
         self.seq : list[Syntax] = seq
     
+    @log_resolve
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
         result = []
         match_found = True
         while match_found:
-            first_token = tokenizer.peek()
-            if self.seq[0].match(first_token):
+            if self.seq[0].match(tokenizer):
                 for ele in self.seq:
                     result += ele.resolve(tokenizer)
             else:
@@ -49,8 +49,9 @@ class OptionalOrMore(HelperSyntax):
         
         return result
     
-    def match(self, t: Token) -> bool:
-        if self.seq[0].match(t):
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        if self.seq[0].match(tokenizer, index=index):
             return True
         return False
 
@@ -58,20 +59,25 @@ class Serial(HelperSyntax):
     
     TYPE: ClassVar[str] = "Serial" #TODO: not right
     
-    def __init__(self, seq : list):
+    def __init__(self, seq: list, look_ahead: int = 0):
         super().__init__()
         self.seq : list[Syntax] = seq
+        self.look_ahead = look_ahead
+        assert self.look_ahead < len(self.seq)
     
+    @log_resolve
     def resolve(self, tokenizer) -> list[Node]:
         result = []
         for ele in self.seq:
             result += ele.resolve(tokenizer)
         return result
     
-    def match(self, t: Token) -> bool:
-        if self.seq[0].match(t):
-            return True
-        return False
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        for i in range(self.look_ahead+1):
+            if not self.seq[i].match(tokenizer, index=index+i):
+                return False
+        return True
 
 class OneOf(HelperSyntax):
     
@@ -80,26 +86,22 @@ class OneOf(HelperSyntax):
     def __init__(self, options : list):
         super().__init__()
         self.options : list[Syntax] = options
-        
-    def match(self, t : Token) -> bool:
-        if any(o.match(t) for o in self.options):
-            print("OneOf() matched!")
+    
+    @log_match
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        if any(o.match(tokenizer, index=index) for o in self.options):
             return True
         return False
-        
+    
+    @log_resolve
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
-        print("Resolving", "OneOf()")
-        first_token = None
         for option in self.options:
-            first_token = tokenizer.peek()
-            print("Peeking token:", first_token)
-            if option.match(first_token):
-                print("Option matched:", option)
+            if option.match(tokenizer):
                 result = option.resolve(tokenizer)
                 return result
         
         options_text = ", ".join((o.type) for o in self.options)
-        error_message = f"Must be one of the following: {options_text}. Instead found {first_token}."
+        error_message = f"Must be one of the following: {options_text}. Instead found {tokenizer.peek()}."
         raise JackSyntaxError(tokenizer, error_message)    
         
 
@@ -186,16 +188,19 @@ class ClassName(Identifier):
     @classmethod
     def add(cls, new_name):
         cls._class_name_registry.add(new_name)
-        
+    
+    @log_match
     @override
-    def match(self, t : Token) -> bool:
+    def match(self, tokenizer: Tokenizer, index: int = 0) -> bool:
+        t = tokenizer.peek(index=index)
         if (self.type == t.type) and (t.name in ClassName._class_name_registry):
             return True
         return False
     
+    @log_resolve
     @override
     def resolve(self, tokenizer : Tokenizer) -> list[Node]:
-        t = tokenizer.next()
-        if not self.match(t):
+        if not self.match(tokenizer):
             raise JackSyntaxError(tokenizer, "Expected valid class name")
+        t = tokenizer.next()
         return [TerminalNode.from_token(t)]

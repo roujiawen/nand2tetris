@@ -79,11 +79,11 @@ class Tokenizer:
     
     def peek(self, index=0) -> Token:
         size = len(self.buffered_tokens)
-        while size <= index:
-            token = self.next()
-            self.buffered_tokens.appendleft(token)
-            size = len(self.buffered_tokens)
-        print(f"peeked {index}-th token:", self.buffered_tokens[index])
+        if size <= index:
+            tokens = []
+            for i in range(index+1):
+                tokens.append(self.next())
+            self.buffered_tokens.extendleft(tokens[::-1])
         return self.buffered_tokens[index]
     
     def next(self) -> Token:
@@ -122,6 +122,7 @@ class Tokenizer:
         # Read next line if previous line is finished
         if self.p == len(self.buffer):
             self.line_count += 1
+            print(f"########## Parsing Line {self.line_count} in {self.filename}... ##########")
             self.buffer = self.source_file.readline()
             if not self.buffer:
                 self.eof = True
