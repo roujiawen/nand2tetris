@@ -3,5 +3,7 @@
 **/test.jack
 .zed
 __pycache__/
+.venv/
+**/*.my.xml
 projects.zip
 projects/
