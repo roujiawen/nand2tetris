@@ -1,4 +1,4 @@
-.PHONY: pyenv-check pyenv-install venv deps-check test test-compiler test-tokenizer clean
+.PHONY: pyenv-check pyenv-install venv deps-check test test-compiler test-tokenizer format check clean
 
 SHELL := bash
 .ONESHELL:
@@ -51,6 +51,12 @@ test-compiler: deps-check
 
 test-tokenizer: deps-check
 	"$(VENV_PYTHON)" -m pytest -k tokenizer
+
+format: deps-check
+	"$(VENV_PYTHON)" -m black .
+
+check: deps-check
+	"$(VENV_PYTHON)" -m mypy .
 
 clean:
 	rm -rf "$(VENV_DIR)"
