@@ -84,4 +84,3 @@ def assert_xml_semantically_equivalent(actual: Path, expected: Path) -> None:
                 ]
             )
         )
-

@@ -63,4 +63,3 @@ class TestTokenizerOutputs(unittest.TestCase):
                             mismatches.append(f"Token output mismatch for {jack.name}: {e}")
 
                     self.assertFalse(mismatches, ";\n".join(mismatches))
-

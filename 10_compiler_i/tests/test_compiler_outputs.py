@@ -82,4 +82,3 @@ class TestCompilerOutputs(unittest.TestCase):
                             mismatches.append(f"Output mismatch for {jack.name}: {e}")
 
                     self.assertFalse(mismatches, ";\n".join(mismatches))
-
